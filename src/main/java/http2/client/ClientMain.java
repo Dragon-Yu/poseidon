@@ -1,4 +1,4 @@
-package client;
+package http2.client;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -32,6 +32,7 @@ public class ClientMain {
 //  static final String URL = "/demo";
   static final String URL = "/";
   static Logger logger = LoggerFactory.getLogger(ClientMain.class);
+  static long startTime, endTime;
 
   public static void main(String[] args) throws Exception {
     // Configure SSL.
@@ -69,6 +70,7 @@ public class ClientMain {
       b.remoteAddress(HOST, PORT);
       b.handler(initializer);
 
+      startTime = System.nanoTime();
       // Start the client.
       Channel channel = b.connect().syncUninterruptibly().channel();
       logger.info("Connected to [" + HOST + ':' + PORT + ']');
@@ -96,7 +98,11 @@ public class ClientMain {
 
       // Wait until the connection is closed.
       channel.close().syncUninterruptibly();
+      endTime = System.nanoTime();
+      logger.info("connection duration: " + String.valueOf(endTime - startTime));
     } finally {
+
+      logger.info("shutting down");
       workerGroup.shutdownGracefully();
     }
   }

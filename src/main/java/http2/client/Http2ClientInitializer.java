@@ -1,4 +1,4 @@
-package client;
+package http2.client;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;

@@ -1,4 +1,4 @@
-package client;
+package http2.client;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
@@ -15,7 +15,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * import io.netty.example.http2.helloworld.client.Http2ClientInitializer;
  * Created by johnson on 16/1/11.
  */
 public class HttpResponseHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
