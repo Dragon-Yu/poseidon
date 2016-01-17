@@ -25,5 +25,5 @@ if [ -z "$jdk8" ];
 then
     java -Xbootclasspath/p:lib/alpn-boot-7.1.3.v20150130.jar -cp ./lib/log4j-core-2.5.jar:./lib/poseidon.jar http2.client.ClientMain
 else
-    java -Xbootclasspath/p:lib/alpn-boot-8.1.4.v20150727.jar -cp ./lib/log4j-core-2.5.jar:./lib/poseidon.jar http2.client.ClientMain
+    java -Xbootclasspath/p:lib/alpn-boot-8.1.4.v20150727.jar -cp ./lib/log4j-core-2.5.jar:./build/libs/poseidon-all-1.0-SNAPSHOT.jar http2.client.ClientMain
 fi
