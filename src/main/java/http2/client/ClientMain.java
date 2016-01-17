@@ -1,5 +1,6 @@
 package http2.client;
 
+import config.BaseTestConfig;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
@@ -25,14 +26,13 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * Created by johnson on 16/1/11.
  */
 public class ClientMain {
-  static final boolean SSL = true;
-//  static final String HOST = "http2.akamai.com";
-  static final String HOST = "www.google.co.jp";
-  static final int PORT = 443;
-//  static final String URL = "/demo";
-  static final String URL = "/";
+  static final boolean SSL = BaseTestConfig.SSL;
+  static final String HOST = BaseTestConfig.HOST;
+  static final int PORT = BaseTestConfig.PORT;
+  static final String URL = BaseTestConfig.URL;
   static Logger logger = LoggerFactory.getLogger(ClientMain.class);
   static long startTime, endTime;
+  static int REQUEST_TIMES = BaseTestConfig.REQUEST_TIMES;
 
   public static void main(String[] args) throws Exception {
     // Configure SSL.
@@ -85,13 +85,16 @@ public class ClientMain {
       AsciiString hostName = new AsciiString(HOST + ':' + PORT);
       logger.info("Sending request(s)...");
       if (URL != null) {
-        // Create a simple GET request.
-        FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, GET, URL);
-        request.headers().add(HttpHeaderNames.HOST, hostName);
-        request.headers().add(HttpConversionUtil.ExtensionHeaderNames.SCHEME.text(), scheme.name());
-        request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
-        request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.DEFLATE);
-        responseHandler.put(streamId, channel.writeAndFlush(request), channel.newPromise());
+        for (int i = 0; i < REQUEST_TIMES; i++) {
+          // Create a simple GET request.
+          FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, GET, URL);
+          request.headers().add(HttpHeaderNames.HOST, hostName);
+          request.headers().add(HttpConversionUtil.ExtensionHeaderNames.SCHEME.text(), scheme.name());
+          request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
+          request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.DEFLATE);
+          responseHandler.put(streamId, channel.writeAndFlush(request), channel.newPromise());
+          streamId += 2;
+        }
       }
       responseHandler.awaitResponses(500, TimeUnit.SECONDS);
       logger.info("Finished HTTP/2 request(s)");
@@ -99,7 +102,8 @@ public class ClientMain {
       // Wait until the connection is closed.
       channel.close().syncUninterruptibly();
       endTime = System.nanoTime();
-      logger.info("connection duration: " + String.valueOf(endTime - startTime));
+      long duration = endTime - startTime;
+      logger.info(String.format("connection duration: %,dns (%d)", duration, duration));
     } finally {
 
       logger.info("shutting down");
