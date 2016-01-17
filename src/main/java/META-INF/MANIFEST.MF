@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+
+Fragment-Host: org.apache.logging.log4j.api

@@ -5,11 +5,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.example.http2.helloworld.server.Http2ServerInitializer;
 import io.netty.handler.codec.http2.Http2SecurityUtil;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.*;
 import io.netty.handler.ssl.util.SelfSignedCertificate;
 
@@ -49,10 +45,10 @@ public class ServerMain {
     try {
       ServerBootstrap b = new ServerBootstrap();
       b.option(ChannelOption.SO_BACKLOG, 1024);
-      b.group(group)
-        .channel(NioServerSocketChannel.class)
-        .handler(new LoggingHandler(LogLevel.INFO))
-        .childHandler(new Http2ServerInitializer(sslCtx));
+//      b.group(group)
+//        .channel(NioServerSocketChannel.class)
+//        .handler(new LoggingHandler(LogLevel.INFO))
+//        .childHandler(new Http2ServerInitializer(sslCtx));
 
       Channel ch = b.bind(PORT).sync().channel();
 
