@@ -13,19 +13,16 @@ import io.netty.handler.ssl.SslContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.netty.handler.logging.LogLevel.INFO;
-
 /**
  * Created by johnson on 16/1/11.
  */
 public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
-  private static final Http2FrameLogger HTTP_2_FRAME_LOGGER = new Http2FrameLogger(INFO, Http2ClientInitializer.class);
   static Logger logger = LoggerFactory.getLogger(Http2ClientInitializer.class);
 
   private final SslContext sslCtx;
   private final int maxContentLength;
   private HttpToHttp2ConnectionHandler connectionHandler;
-  private HttpResponseHandler responseHandler;
+  private Http2ResponseHandler responseHandler;
   private Http2SettingsHandler settingsHandler;
 
   public Http2ClientInitializer(SslContext sslCtx, int maxContentLength) {
@@ -37,15 +34,16 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
   public void initChannel(SocketChannel ch) throws Exception {
     logger.info("init channel");
     final Http2Connection connection = new DefaultHttp2Connection(false);
-    connectionHandler = new HttpToHttp2ConnectionHandler.Builder()
-      .frameListener(new DelegatingDecompressorFrameListener(connection,
-        new InboundHttp2ToHttpAdapter.Builder(connection)
+    connectionHandler = new HttpToHttp2ConnectionHandlerBuilder()
+      .frameListener(new DelegatingDecompressorFrameListener(
+        connection,
+        new InboundHttp2ToHttpAdapterBuilder(connection)
           .maxContentLength(maxContentLength)
           .propagateSettings(true)
           .build()))
-      .frameLogger(HTTP_2_FRAME_LOGGER)
-      .build(connection);
-    responseHandler = new HttpResponseHandler();
+      .connection(connection)
+      .build();
+    responseHandler = new Http2ResponseHandler();
     settingsHandler = new Http2SettingsHandler(ch.newPromise());
     if (sslCtx != null) {
       configureSsl(ch);
@@ -54,7 +52,7 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
     }
   }
 
-  public HttpResponseHandler responseHandler() {
+  public Http2ResponseHandler responseHandler() {
     return responseHandler;
   }
 
@@ -104,6 +102,17 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
   }
 
   /**
+   * Class that logs any User Events triggered on this channel.
+   */
+  private static class UserEventLogger extends ChannelInboundHandlerAdapter {
+    @Override
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+      System.out.println("User Event Triggered: " + evt);
+      ctx.fireUserEventTriggered(evt);
+    }
+  }
+
+  /**
    * A handler that triggers the cleartext upgrade to HTTP/2 by sending an initial HTTP request.
    */
   private final class UpgradeRequestHandler extends ChannelInboundHandlerAdapter {
@@ -119,17 +128,6 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
       ctx.pipeline().remove(this);
 
       configureEndOfPipeline(ctx.pipeline());
-    }
-  }
-
-  /**
-   * Class that logs any User Events triggered on this channel.
-   */
-  private static class UserEventLogger extends ChannelInboundHandlerAdapter {
-    @Override
-    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-      System.out.println("User Event Triggered: " + evt);
-      ctx.fireUserEventTriggered(evt);
     }
   }
 }

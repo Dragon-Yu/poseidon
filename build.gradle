@@ -13,18 +13,20 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     compile 'org.apache.logging.log4j:log4j-core:2.5'
     compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.5'
-    compile 'io.netty:netty-all:4.1.0.Beta8'
+    compile 'io.netty:netty-all:4.1.0.CR3'
     compile 'com.twitter:hpack:v1.0.1'
-//    compile 'io.netty:netty-example:4.1.0.Beta8'
+    compile 'io.netty:netty-example:4.1.0.CR3'
     compile 'org.eclipse.jetty.alpn:alpn-api:1.0.0'
-//    compile 'io.netty:netty-tcnative:1.1.33.Fork10:osx-x86_64'
+    compile 'io.netty:netty-tcnative:1.1.33.Fork10:osx-x86_64'
+    compile 'com.google.guava:guava:19.0'
+    compile 'joda-time:joda-time:2.9.2'
 }
 
 task fatJar(type: Jar) {
     manifest {
         attributes 'Implementation-Title': 'poseidon',
                 'Implementation-Version': version,
-                'Main-Class': 'http2.client.ClientMain'
+                'Main-Class': 'http2.client.Http2ClientMain'
     }
     baseName = project.name + '-all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }

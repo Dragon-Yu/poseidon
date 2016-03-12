@@ -17,12 +17,12 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by johnson on 16/1/11.
  */
-public class HttpResponseHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
-  static Logger logger = LoggerFactory.getLogger(HttpResponseHandler.class);
+public class Http2ResponseHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
+  static Logger logger = LoggerFactory.getLogger(Http2ResponseHandler.class);
 
   private SortedMap<Integer, Map.Entry<ChannelFuture, ChannelPromise>> streamidPromiseMap;
 
-  public HttpResponseHandler() {
+  public Http2ResponseHandler() {
     streamidPromiseMap = new TreeMap<>();
   }
 
@@ -32,8 +32,8 @@ public class HttpResponseHandler extends SimpleChannelInboundHandler<FullHttpRes
    * @param streamId The stream for which a response is expected
    * @param writeFuture A future that represent the request write operation
    * @param promise The promise object that will be used to wait/notify events
-   * @return The previous object associated with {@code streamId}
-   * @see HttpResponseHandler#awaitResponses(long, java.util.concurrent.TimeUnit)
+   * @return The previous objec associated with {@code streamId}
+   * @see Http2ResponseHandler#awaitResponses(long, java.util.concurrent.TimeUnit)
    */
   public Map.Entry<ChannelFuture, ChannelPromise> put(int streamId, ChannelFuture writeFuture, ChannelPromise promise) {
     return streamidPromiseMap.put(streamId, new AbstractMap.SimpleEntry<>(writeFuture, promise));
@@ -44,7 +44,7 @@ public class HttpResponseHandler extends SimpleChannelInboundHandler<FullHttpRes
    *
    * @param timeout Value of time to wait for each response
    * @param unit Units associated with {@code timeout}
-   * @see HttpResponseHandler#put(int, io.netty.channel.ChannelPromise)
+   * @see Http2ResponseHandler#put(int, io.netty.channel.ChannelPromise)
    */
   public void awaitResponses(long timeout, TimeUnit unit) {
     Iterator<Map.Entry<Integer, Map.Entry<ChannelFuture, ChannelPromise>>> itr = streamidPromiseMap.entrySet().iterator();
