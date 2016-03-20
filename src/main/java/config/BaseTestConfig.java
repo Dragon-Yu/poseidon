@@ -7,7 +7,7 @@ package config;
  */
 public class BaseTestConfig {
 
-  public static final int REQUEST_TIMES = 1;
+  public static final int REQUEST_TIMES = 20;
   public static final boolean SSL = true;
   public static final String URI = "https://isports-1093.appspot.com:443/ping";
 }

@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A simple HTTP client that prints out the content of the HTTP response to
@@ -35,6 +36,7 @@ import java.net.URI;
 public final class HttpsClient {
   static long startTime, endTime;
   static Logger logger = LoggerFactory.getLogger(HttpsClient.class);
+  static AtomicInteger counter = new AtomicInteger(1);
 
   public static void main(String[] args) throws Exception {
     URI uri = new URI(BaseTestConfig.URI);
@@ -58,15 +60,14 @@ public final class HttpsClient {
       startTime = System.nanoTime();
       Channel ch = b.connect(host, port).sync().channel();
 
-      // Prepare the HTTP request.
-      HttpRequest request = new DefaultFullHttpRequest(
-        HttpVersion.HTTP_1_1, HttpMethod.GET, uri.getRawPath());
-      request.headers().set(HttpHeaderNames.HOST, host);
-      request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
-      request.headers().set(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
-
-      // Send the HTTP request.
-      ch.writeAndFlush(request);
+      for (int i = 0; i < BaseTestConfig.REQUEST_TIMES; i++) {
+        HttpRequest request = new DefaultFullHttpRequest(
+          HttpVersion.HTTP_1_1, HttpMethod.GET, uri.getRawPath());
+        request.headers().set(HttpHeaderNames.HOST, host);
+        request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+        request.headers().set(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
+        ch.writeAndFlush(request);
+      }
 
       // Wait for the server to close the connection.
       ch.closeFuture().sync();
