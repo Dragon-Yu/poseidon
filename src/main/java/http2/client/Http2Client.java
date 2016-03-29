@@ -26,16 +26,16 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * Http2 client starter
  * Created by johnson on 16/1/11.
  */
-public class Http2ClientMain {
+public class Http2Client {
   static final boolean SSL = BaseTestConfig.SSL;
   static final String URL = BaseTestConfig.URI;
   static String HOST;
   static int PORT;
-  static Logger logger = LoggerFactory.getLogger(Http2ClientMain.class);
+  static Logger logger = LoggerFactory.getLogger(Http2Client.class);
   static long startTime, endTime;
   static int REQUEST_TIMES = BaseTestConfig.REQUEST_TIMES;
 
-  public static void main(String[] args) throws Exception {
+  public void run() throws Exception {
     URI uri = new URI(BaseTestConfig.URI);
     HOST = uri.getHost();
     PORT = uri.getPort();
