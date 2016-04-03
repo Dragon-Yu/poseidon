@@ -42,7 +42,7 @@ public class Http2Client {
 
     final SslContext sslCtx;
     if (SSL) {
-      SslProvider provider = SslProvider.OPENSSL;
+      SslProvider provider = SslProvider.JDK;
       sslCtx = SslContextBuilder.forClient()
         .sslProvider(provider)
         /* NOTE: the cipher filter may not include all ciphers required by the HTTP/2 specification.

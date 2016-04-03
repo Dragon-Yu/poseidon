@@ -3,7 +3,7 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
@@ -15,18 +15,17 @@ dependencies {
     compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.5'
     compile 'io.netty:netty-all:4.1.0.CR3'
     compile 'com.twitter:hpack:v1.0.1'
-    compile 'io.netty:netty-example:4.1.0.CR3'
+//    compile 'io.netty:netty-example:4.1.0.CR3'
     compile 'org.eclipse.jetty.alpn:alpn-api:1.0.0'
-    compile 'io.netty:netty-tcnative:1.1.33.Fork10:osx-x86_64'
     compile 'com.google.guava:guava:19.0'
     compile 'joda-time:joda-time:2.9.2'
 }
 
 task fatJar(type: Jar) {
     manifest {
-        attributes 'Implementation-Title': 'poseidon',
-                'Implementation-Version': version,
-                'Main-Class': 'http2.client.Http2Client'
+        attributes = ['Implementation-Title'  : 'poseidon',
+                      'Implementation-Version': version,
+                      'Main-Class'            : 'main.ClientMain']
     }
     baseName = project.name + '-all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
