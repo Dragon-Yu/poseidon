@@ -69,3 +69,6 @@ crashlytics-build.properties
 
 # Avoid ignoring lib dir
 !lib/*
+
+# Ingoring planet lab content
+planet_lab/
