@@ -1,5 +1,37 @@
 #!/usr/bin/env bash
 
-JAVA_HOME='jre1.8.0_51'
+log_url_debug='http://localhost:8080/log/api_request'
+log_url_release='http://prometheus-1151.appspot.com/log/api_request'
+log_url="$log_url_release"
+
+host_name=`hostname`
+target_url='https://isports-1093.appspot.com:443/ping'
+target_host='isports-1093.appspot.com'
+https_transfer_time='['
+http2_transfer_time='['
+trace_route=`traceroute "$target_host" | tr '\n' ';'`
+
+JAVA_HOME='./jre1.8.0_51'
 JAVA_CMD="$JAVA_HOME/bin/java"
-exec "$JAVA_CMD" -Xbootclasspath/p:./lib/alpn-boot-8.1.4.v20150727.jar -jar poseidon-all-1.0-SNAPSHOT.jar http2.client.ClientMain
+#JAVA_CMD='java'
+
+END=20
+for i in $(seq ${END})
+do
+    data=`"$JAVA_CMD" -Xbootclasspath/p:./lib/alpn-boot-8.1.4.v20150727.jar -jar poseidon-all-1.0-SNAPSHOT.jar http2.client.ClientMain| grep 'connection duration'| grep -o '(\d\{1,\})$'|grep -o '\d\{1,\}'`
+    https_data=`echo "$data"|tr ' ' '\n'| head -n1| tail -n1`
+    http2_data=`echo "$data"|tr ' ' '\n'| head -n2| tail -n1`
+    separator=', '
+    if [ ${i} -eq ${END} ]; then
+        separator=''
+    fi
+    https_transfer_time=${https_transfer_time}${https_data}${separator}
+    http2_transfer_time=${http2_transfer_time}${http2_data}${separator}
+done
+https_transfer_time=${https_transfer_time}']'
+http2_transfer_time=${http2_transfer_time}']'
+
+
+post_data="{  \"host_name\": \"$host_name\", \"target_url\": \"$target_url\",  \"https_transfer_time\": $https_transfer_time, \"http2_transfer_time\": $http2_transfer_time,  \"trace_route\": \"$trace_route\"}"
+echo "$post_data"
+wget -qO- --header='content-type: application/json' "$log_url" --post-data="$post_data"

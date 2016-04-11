@@ -4,6 +4,7 @@ import http2.client.Http2Client;
 import https.client.HttpsClient;
 
 /**
+ * Main class for Https/Http2 client
  * Created by johnson on 16/3/29.
  */
 public class ClientMain {
