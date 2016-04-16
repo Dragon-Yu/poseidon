@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+base=$(pwd)
+if [[ -L $0 ]] ; then
+    path=$(readlink "$0")
+else
+    path=$0
+fi
+cd $(dirname "$path")
+
 log_url_debug='http://localhost:8080/log/api_request'
 log_url_release='http://prometheus-1151.appspot.com/log/api_request'
 log_url="$log_url_release"
