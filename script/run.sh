@@ -26,7 +26,7 @@ JAVA_CMD="$JAVA_HOME/bin/java"
 END=20
 for i in $(seq ${END})
 do
-    data=`"$JAVA_CMD" -Xbootclasspath/p:./lib/alpn-boot-8.1.4.v20150727.jar -jar poseidon-all-1.0-SNAPSHOT.jar http2.client.ClientMain| grep 'connection duration'| grep -o '(\d\{1,\})$'|grep -o '\d\{1,\}'`
+    data=`"$JAVA_CMD" -Xbootclasspath/p:./lib/alpn-boot-8.1.4.v20150727.jar -jar poseidon-all-1.0-SNAPSHOT.jar http2.client.ClientMain| grep 'connection duration'| grep -o '([0-9]\{1,\})$'|grep -o '[0-9]\{1,\}'`
     https_data=`echo "$data"|tr ' ' '\n'| head -n1| tail -n1`
     http2_data=`echo "$data"|tr ' ' '\n'| head -n2| tail -n1`
     separator=', '
