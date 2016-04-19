@@ -72,3 +72,5 @@ crashlytics-build.properties
 
 # Ingoring planet lab content
 planet_lab/
+
+planet.tar
