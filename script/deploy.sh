@@ -7,6 +7,9 @@ else
 fi
 cd $(dirname "$path")
 
+if [ ! -d '../planet_lab' ]; then
+    mkdir ../planet_lab
+fi
 if [ ! -d '../planet_lab/lib' ]; then
     mkdir ../planet_lab/lib
 fi
