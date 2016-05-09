@@ -7,7 +7,14 @@ package config;
  */
 public class BaseTestConfig {
 
-  public static final int REQUEST_TIMES = 20;
-  public static final boolean SSL = true;
-  public static final String URI = "https://isports-1093.appspot.com:443/ping";
+  public static int REQUEST_TIMES = 20;
+  public static boolean SSL = true;
+  public static String URI = "https://isports-1093.appspot.com:443/ping";
+  public static final String ATTR_URI = "poseidon_url";
+
+  static {
+    if (System.getenv(ATTR_URI) != null && !System.getenv(ATTR_URI).isEmpty()) {
+      URI = System.getenv(ATTR_URI);
+    }
+  }
 }

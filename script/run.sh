@@ -12,9 +12,16 @@ log_url_debug='http://localhost:8080/log/api_request'
 log_url_release='http://prometheus-1151.appspot.com/log/api_request'
 log_url="$log_url_release"
 
+if [ -z $poseidon_url ] || [ -z $poseidon_host ]
+then
+    echo 'poseidon_url or poseidon_host is not defined'
+    exit 1
+else
+    target_url=${poseidon_url}
+    target_host=${poseidon_host}
+fi
+
 host_name=`hostname`
-target_url='https://isports-1093.appspot.com:443/ping'
-target_host='isports-1093.appspot.com'
 https_transfer_time='['
 http2_transfer_time='['
 trace_route=`traceroute "$target_host" | tr '\n' ';'`
