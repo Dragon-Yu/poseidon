@@ -42,7 +42,7 @@ public class HttpsHandler extends SimpleChannelInboundHandler<HttpObject> {
     }
     if (msg instanceof HttpContent) {
       HttpContent content = (HttpContent) msg;
-      logger.info(content.content().toString(CharsetUtil.UTF_8));
+      logger.info(String.valueOf(content.content().toString(CharsetUtil.UTF_8).length()));
       if (content instanceof LastHttpContent) {
         logger.info("} END OF CONTENT");
       }

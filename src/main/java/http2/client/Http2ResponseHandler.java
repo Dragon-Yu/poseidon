@@ -44,7 +44,6 @@ public class Http2ResponseHandler extends SimpleChannelInboundHandler<FullHttpRe
    *
    * @param timeout Value of time to wait for each response
    * @param unit Units associated with {@code timeout}
-   * @see Http2ResponseHandler#put(int, io.netty.channel.ChannelPromise)
    */
   public void awaitResponses(long timeout, TimeUnit unit) {
     Iterator<Map.Entry<Integer, Map.Entry<ChannelFuture, ChannelPromise>>> itr = streamidPromiseMap.entrySet().iterator();
@@ -87,7 +86,7 @@ public class Http2ResponseHandler extends SimpleChannelInboundHandler<FullHttpRe
         int contentLength = content.readableBytes();
         byte[] arr = new byte[contentLength];
         content.readBytes(arr);
-        logger.info(new String(arr, 0, contentLength, CharsetUtil.UTF_8));
+        logger.info(String.valueOf(new String(arr, 0, contentLength, CharsetUtil.UTF_8).length()));
       }
       entry.getValue().setSuccess();
     }
