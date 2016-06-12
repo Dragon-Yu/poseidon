@@ -45,8 +45,8 @@ public class HttpsHandler extends SimpleChannelInboundHandler<HttpObject> {
       logger.info(String.valueOf(content.content().toString(CharsetUtil.UTF_8).length()));
       if (content instanceof LastHttpContent) {
         logger.info("} END OF CONTENT");
+        HttpsClient.counter.getAndAdd(1);
       }
-      HttpsClient.counter.getAndAdd(1);
     }
   }
 

@@ -9,7 +9,7 @@ public class BaseTestConfig {
 
   public static int REQUEST_TIMES = 20;
   public static boolean SSL = true;
-  public static String URI = "https://isports-1093.appspot.com:443/ping";
+  public static String URI = "https://www.google.com:443";
   public static final String ATTR_URI = "poseidon_url";
 
   static {

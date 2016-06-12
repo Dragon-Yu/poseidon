@@ -24,6 +24,10 @@ public final class HttpsClient {
   static Logger logger = LoggerFactory.getLogger(HttpsClient.class);
   static AtomicInteger counter = new AtomicInteger(1);
 
+  public static void main(String[] args) throws Exception {
+    new HttpsClient().run();
+  }
+
   public void run() throws Exception {
     URI uri = new URI(BaseTestConfig.URI);
     int port = uri.getPort();
