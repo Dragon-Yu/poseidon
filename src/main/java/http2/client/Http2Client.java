@@ -28,7 +28,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  */
 public class Http2Client {
   static final boolean SSL = BaseTestConfig.SSL;
-  static final String URL = BaseTestConfig.URI;
+  static final String URI = BaseTestConfig.URI;
   static String HOST;
   static int PORT;
   static Logger logger = LoggerFactory.getLogger(Http2Client.class);
@@ -88,10 +88,10 @@ public class Http2Client {
       HttpScheme scheme = SSL ? HttpScheme.HTTPS : HttpScheme.HTTP;
       AsciiString hostName = new AsciiString(HOST + ':' + PORT);
       logger.info("Sending request(s)...");
-      if (URL != null) {
+      if (URI != null) {
         for (int i = 0; i < REQUEST_TIMES; i++) {
           // Create a simple GET request.
-          FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, GET, URL);
+          FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, GET, URI);
           request.headers().add(HttpHeaderNames.HOST, hostName);
           request.headers().add(HttpConversionUtil.ExtensionHeaderNames.SCHEME.text(), scheme.name());
           request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
@@ -112,5 +112,9 @@ public class Http2Client {
       logger.info("shutting down");
       workerGroup.shutdownGracefully();
     }
+  }
+
+  public long getTimeElapsed() {
+    return endTime - startTime;
   }
 }

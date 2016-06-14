@@ -28,7 +28,7 @@ public class Uploader {
 
   public void upload_http2_vs_http(ApiRequestData apiRequestData) throws IOException {
     String postData = new GsonBuilder().create().toJson(apiRequestData);
-    URL url = new URL(BaseTestConfig.LOG_URI);
+    URL url = new URL(BaseTestConfig.LOG_URL);
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setDoOutput(true);
     connection.setRequestMethod("POST");

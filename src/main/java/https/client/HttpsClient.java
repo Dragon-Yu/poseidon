@@ -69,4 +69,8 @@ public final class HttpsClient {
       group.shutdownGracefully();
     }
   }
+
+  public long getTimeElapsed() {
+    return endTime - startTime;
+  }
 }
