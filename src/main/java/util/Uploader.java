@@ -21,11 +21,6 @@ public class Uploader {
 
   private static Logger logger = LoggerFactory.getLogger(Uploader.class);
 
-  public static void main(String[] args) throws Exception {
-    Uploader uploader = new Uploader();
-    uploader.upload_http2_vs_http(new ApiRequestData("target url", 1, 2));
-  }
-
   public void upload_http2_vs_http(ApiRequestData apiRequestData) throws IOException {
     String postData = new GsonBuilder().create().toJson(apiRequestData);
     URL url = new URL(BaseTestConfig.LOG_URL);

@@ -10,6 +10,7 @@ import io.netty.handler.codec.http2.*;
 import io.netty.handler.ssl.ApplicationProtocolNames;
 import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler;
 import io.netty.handler.ssl.SslContext;
+import io.netty.handler.traffic.ChannelTrafficShapingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +25,7 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
   private HttpToHttp2ConnectionHandler connectionHandler;
   private Http2ResponseHandler responseHandler;
   private Http2SettingsHandler settingsHandler;
+  ChannelTrafficShapingHandler channelTrafficShapingHandler = new ChannelTrafficShapingHandler(10);
 
   public Http2ClientInitializer(SslContext sslCtx, int maxContentLength) {
     this.sslCtx = sslCtx;
@@ -69,6 +71,7 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
    */
   private void configureSsl(SocketChannel ch) {
     ChannelPipeline pipeline = ch.pipeline();
+    pipeline.addLast(channelTrafficShapingHandler);
     pipeline.addLast(sslCtx.newHandler(ch.alloc()));
     // We must wait for the handshake to finish and the protocol to be negotiated before configuring
     // the HTTP/2 components of the pipeline.

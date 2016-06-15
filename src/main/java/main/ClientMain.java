@@ -19,10 +19,9 @@ public class ClientMain {
     httpsClient.run();
     http2Client.run();
 
-    long httpsTime = httpsClient.getTimeElapsed();
-    long http2Time = http2Client.getTimeElapsed();
-
     Uploader uploader = new Uploader();
-    uploader.upload_http2_vs_http(new ApiRequestData(BaseTestConfig.URI, http2Time, httpsTime));
+    uploader.upload_http2_vs_http(new ApiRequestData(BaseTestConfig.URI, http2Client.getTimeElapsed(),
+      httpsClient.getTimeElapsed(), httpsClient.getRequestSize(), httpsClient.getResponseSize(),
+      http2Client.getRequestSize(), http2Client.getResponseSize()));
   }
 }

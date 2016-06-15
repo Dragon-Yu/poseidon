@@ -34,6 +34,7 @@ public class Http2Client {
   static Logger logger = LoggerFactory.getLogger(Http2Client.class);
   static long startTime, endTime;
   static int REQUEST_TIMES = BaseTestConfig.REQUEST_TIMES;
+  Http2ClientInitializer initializer;
 
   public void run() throws Exception {
     URI uri = new URI(BaseTestConfig.URI);
@@ -63,7 +64,7 @@ public class Http2Client {
     }
 
     EventLoopGroup workerGroup = new NioEventLoopGroup();
-    Http2ClientInitializer initializer = new Http2ClientInitializer(sslCtx, Integer.MAX_VALUE);
+    initializer = new Http2ClientInitializer(sslCtx, Integer.MAX_VALUE);
 
     try {
       // Configure the client.
@@ -116,5 +117,13 @@ public class Http2Client {
 
   public long getTimeElapsed() {
     return endTime - startTime;
+  }
+
+  public long getRequestSize() {
+    return initializer.channelTrafficShapingHandler.trafficCounter().cumulativeWrittenBytes();
+  }
+
+  public long getResponseSize() {
+    return initializer.channelTrafficShapingHandler.trafficCounter().cumulativeReadBytes();
   }
 }

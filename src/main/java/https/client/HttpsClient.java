@@ -23,6 +23,7 @@ public final class HttpsClient {
   static long startTime, endTime;
   static Logger logger = LoggerFactory.getLogger(HttpsClient.class);
   static AtomicInteger counter = new AtomicInteger(1);
+  HttpsInitializer httpsInitializer;
 
   public static void main(String[] args) throws Exception {
     new HttpsClient().run();
@@ -40,15 +41,17 @@ public final class HttpsClient {
 
     // Configure the client.
     EventLoopGroup group = new NioEventLoopGroup();
+    httpsInitializer = new HttpsInitializer(sslCtx);
     try {
       Bootstrap b = new Bootstrap();
       b.group(group)
         .channel(NioSocketChannel.class)
-        .handler(new HttpsInitializer(sslCtx));
+        .handler(httpsInitializer);
 
       // Make the connection attempt.
       startTime = System.nanoTime();
       Channel ch = b.connect(host, port).sync().channel();
+      logger.info("target host: " + ch.remoteAddress());
 
       for (int i = 0; i < BaseTestConfig.REQUEST_TIMES; i++) {
         HttpRequest request = new DefaultFullHttpRequest(
@@ -72,5 +75,13 @@ public final class HttpsClient {
 
   public long getTimeElapsed() {
     return endTime - startTime;
+  }
+
+  public long getRequestSize() {
+    return httpsInitializer.channelTrafficShapingHandler.trafficCounter().cumulativeWrittenBytes();
+  }
+
+  public long getResponseSize() {
+    return httpsInitializer.channelTrafficShapingHandler.trafficCounter().cumulativeReadBytes();
   }
 }

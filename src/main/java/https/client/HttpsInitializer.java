@@ -13,16 +13,22 @@ package https.client;/*
  * License for the specific language governing permissions and limitations
  * under the License.
  */
+
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.ssl.SslContext;
+import io.netty.handler.traffic.ChannelTrafficShapingHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpsInitializer extends ChannelInitializer<SocketChannel> {
 
   private final SslContext sslCtx;
+  Logger logger = LoggerFactory.getLogger(HttpsInitializer.class);
+  ChannelTrafficShapingHandler channelTrafficShapingHandler = new ChannelTrafficShapingHandler(10);
 
   public HttpsInitializer(SslContext sslCtx) {
     this.sslCtx = sslCtx;
@@ -31,6 +37,8 @@ public class HttpsInitializer extends ChannelInitializer<SocketChannel> {
   @Override
   public void initChannel(SocketChannel ch) {
     ChannelPipeline p = ch.pipeline();
+
+    p.addLast(channelTrafficShapingHandler);
 
     // Enable HTTPS if necessary.
     if (sslCtx != null) {
