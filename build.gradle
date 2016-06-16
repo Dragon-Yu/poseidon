@@ -24,11 +24,6 @@ dependencies {
 }
 
 task fatJar(type: Jar) {
-    manifest {
-        attributes = ['Implementation-Title'  : 'poseidon',
-                      'Implementation-Version': version,
-                      'Main-Class'            : 'main.ClientMain']
-    }
     baseName = project.name + '-all'
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
