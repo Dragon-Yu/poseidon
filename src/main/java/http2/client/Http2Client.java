@@ -28,7 +28,6 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  */
 public class Http2Client {
   static final boolean SSL = BaseTestConfig.SSL;
-  static final String URI = BaseTestConfig.URI;
   static String HOST;
   static int PORT;
   static Logger logger = LoggerFactory.getLogger(Http2Client.class);
@@ -36,8 +35,7 @@ public class Http2Client {
   static int REQUEST_TIMES = BaseTestConfig.REQUEST_TIMES;
   Http2ClientInitializer initializer;
 
-  public void run() throws Exception {
-    URI uri = new URI(URI);
+  public void run(URI uri) throws Exception {
     HOST = uri.getHost();
     PORT = uri.getPort() > 0 ? uri.getPort() : BaseTestConfig.HTTPS_PORT;
 
@@ -89,17 +87,15 @@ public class Http2Client {
       HttpScheme scheme = SSL ? HttpScheme.HTTPS : HttpScheme.HTTP;
       AsciiString hostName = new AsciiString(HOST + ':' + PORT);
       logger.info("Sending request(s)...");
-      if (URI != null) {
-        for (int i = 0; i < REQUEST_TIMES; i++) {
-          // Create a simple GET request.
-          FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, GET, URI);
-          request.headers().add(HttpHeaderNames.HOST, hostName);
-          request.headers().add(HttpConversionUtil.ExtensionHeaderNames.SCHEME.text(), scheme.name());
-          request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
-          request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.DEFLATE);
-          responseHandler.put(streamId, channel.writeAndFlush(request), channel.newPromise());
-          streamId += 2;
-        }
+      for (int i = 0; i < REQUEST_TIMES; i++) {
+        // Create a simple GET request.
+        FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, GET, uri.toString());
+        request.headers().add(HttpHeaderNames.HOST, hostName);
+        request.headers().add(HttpConversionUtil.ExtensionHeaderNames.SCHEME.text(), scheme.name());
+        request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
+        request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.DEFLATE);
+        responseHandler.put(streamId, channel.writeAndFlush(request), channel.newPromise());
+        streamId += 2;
       }
       responseHandler.awaitResponses(500, TimeUnit.SECONDS);
       logger.info("Finished HTTP/2 request(s)");

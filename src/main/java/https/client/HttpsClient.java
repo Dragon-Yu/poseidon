@@ -25,12 +25,7 @@ public final class HttpsClient {
   static AtomicInteger counter = new AtomicInteger(1);
   HttpsInitializer httpsInitializer;
 
-  public static void main(String[] args) throws Exception {
-    new HttpsClient().run();
-  }
-
-  public void run() throws Exception {
-    URI uri = new URI(BaseTestConfig.URI);
+  public void run(URI uri) throws Exception {
     int port = uri.getPort() > 0 ? uri.getPort() : BaseTestConfig.HTTPS_PORT;
     String host = uri.getHost();
 
