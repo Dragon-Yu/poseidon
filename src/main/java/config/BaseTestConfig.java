@@ -16,8 +16,9 @@ public class BaseTestConfig {
 
   public static int REQUEST_TIMES = 20;
   public static boolean SSL = true;
-  public static String URI = "https://www.google.com:443";
+  public static String URI = "https://www.google.com";
   public static String LOG_URL = "https://prometheus-1151.appspot.com/log/api_request";
+  public static final int HTTPS_PORT = 443;
 
   //variables that can be set by shell environment variable
   private static final String ATTR_URI = "target_url";

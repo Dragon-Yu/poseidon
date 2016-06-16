@@ -37,9 +37,9 @@ public class Http2Client {
   Http2ClientInitializer initializer;
 
   public void run() throws Exception {
-    URI uri = new URI(BaseTestConfig.URI);
+    URI uri = new URI(URI);
     HOST = uri.getHost();
-    PORT = uri.getPort();
+    PORT = uri.getPort() > 0 ? uri.getPort() : BaseTestConfig.HTTPS_PORT;
 
     final SslContext sslCtx;
     if (SSL) {

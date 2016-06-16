@@ -31,7 +31,7 @@ public final class HttpsClient {
 
   public void run() throws Exception {
     URI uri = new URI(BaseTestConfig.URI);
-    int port = uri.getPort();
+    int port = uri.getPort() > 0 ? uri.getPort() : BaseTestConfig.HTTPS_PORT;
     String host = uri.getHost();
 
     // Configure SSL context if necessary.
