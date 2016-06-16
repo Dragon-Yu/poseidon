@@ -3,6 +3,7 @@ package https.client;
 import config.BaseTestConfig;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -39,6 +40,7 @@ public final class HttpsClient {
     httpsInitializer = new HttpsInitializer(sslCtx);
     try {
       Bootstrap b = new Bootstrap();
+      b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
       b.group(group)
         .channel(NioSocketChannel.class)
         .handler(httpsInitializer);

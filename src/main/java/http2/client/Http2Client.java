@@ -72,6 +72,7 @@ public class Http2Client {
       bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
       bootstrap.remoteAddress(HOST, PORT);
       bootstrap.handler(initializer);
+      bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
 
       startTime = System.nanoTime();
       // Start the client.
