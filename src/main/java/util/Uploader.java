@@ -3,6 +3,7 @@ package util;
 import com.google.gson.GsonBuilder;
 import config.BaseTestConfig;
 import entity.ApiRequestData;
+import entity.Http2CheckResultData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,10 +22,23 @@ public class Uploader {
 
   private static Logger logger = LoggerFactory.getLogger(Uploader.class);
 
-  public void upload_http2_vs_http(ApiRequestData apiRequestData) throws IOException {
+  public void uploadHttp2VsHttp(ApiRequestData apiRequestData) throws IOException {
     String postData = new GsonBuilder().create().toJson(apiRequestData);
-    URL url = new URL(BaseTestConfig.LOG_URL);
+    URL url = new URL(BaseTestConfig.API_REQUEST_LOG_URL);
+    String response = post(url, postData);
+    logger.info(response);
+  }
+
+  public void uploadHttp2CheckResult(Http2CheckResultData http2CheckResultData) throws IOException {
+    String postData = new GsonBuilder().create().toJson(http2CheckResultData);
+    URL url = new URL(BaseTestConfig.HTTP2_CHECK_LOG_URL);
+    String response = post(url, postData);
+    logger.info(response);
+  }
+
+  private String post(URL url, String postData) throws IOException {
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+    connection.setConnectTimeout(30000);
     connection.setDoOutput(true);
     connection.setRequestMethod("POST");
     connection.setRequestProperty("Content-Type", "application/json");
@@ -37,6 +51,6 @@ public class Uploader {
     while ((line = bufferedReader.readLine()) != null) {
       stringBuilder.append(line + "\n");
     }
-    logger.info(stringBuilder.toString().trim());
+    return stringBuilder.toString().trim();
   }
 }

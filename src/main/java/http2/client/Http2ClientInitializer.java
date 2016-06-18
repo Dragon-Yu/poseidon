@@ -1,11 +1,10 @@
 package http2.client;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
+import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http2.*;
 import io.netty.handler.ssl.ApplicationProtocolNames;
 import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler;
@@ -22,10 +21,10 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
 
   private final SslContext sslCtx;
   private final int maxContentLength;
+  ChannelTrafficShapingHandler channelTrafficShapingHandler = new ChannelTrafficShapingHandler(10);
   private HttpToHttp2ConnectionHandler connectionHandler;
   private Http2ResponseHandler responseHandler;
   private Http2SettingsHandler settingsHandler;
-  ChannelTrafficShapingHandler channelTrafficShapingHandler = new ChannelTrafficShapingHandler(10);
 
   public Http2ClientInitializer(SslContext sslCtx, int maxContentLength) {
     this.sslCtx = sslCtx;
@@ -46,12 +45,9 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
       .connection(connection)
       .build();
     responseHandler = new Http2ResponseHandler();
-    settingsHandler = new Http2SettingsHandler(ch.newPromise());
-    if (sslCtx != null) {
-      configureSsl(ch);
-    } else {
-      configureClearText(ch);
-    }
+    ChannelPromise channelPromise = ch.newPromise();
+    settingsHandler = new Http2SettingsHandler(channelPromise);
+    configureSsl(ch, channelPromise);
   }
 
   public Http2ResponseHandler responseHandler() {
@@ -62,14 +58,14 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
     return settingsHandler;
   }
 
-  protected void configureEndOfPipeline(ChannelPipeline pipeline) {
+  private void configureEndOfPipeline(ChannelPipeline pipeline) {
     pipeline.addLast(settingsHandler, responseHandler);
   }
 
   /**
    * Configure the pipeline for TLS NPN negotiation to HTTP/2.
    */
-  private void configureSsl(SocketChannel ch) {
+  private void configureSsl(SocketChannel ch, ChannelPromise channelPromise) {
     ChannelPipeline pipeline = ch.pipeline();
     pipeline.addLast(channelTrafficShapingHandler);
     pipeline.addLast(sslCtx.newHandler(ch.alloc()));
@@ -85,23 +81,10 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
           return;
         }
         ctx.close();
-        throw new IllegalStateException("unknown protocol: " + protocol);
+        logger.info(ctx.channel().remoteAddress().toString());
+        channelPromise.setFailure(new IllegalStateException("unknown protocol: " + protocol));
       }
     });
-  }
-
-  /**
-   * Configure the pipeline for a cleartext upgrade from HTTP to HTTP/2.
-   */
-  private void configureClearText(SocketChannel ch) {
-    HttpClientCodec sourceCodec = new HttpClientCodec();
-    Http2ClientUpgradeCodec upgradeCodec = new Http2ClientUpgradeCodec(connectionHandler);
-    HttpClientUpgradeHandler upgradeHandler = new HttpClientUpgradeHandler(sourceCodec, upgradeCodec, 65536);
-
-    ch.pipeline().addLast(sourceCodec,
-      upgradeHandler,
-      new UpgradeRequestHandler(),
-      new UserEventLogger());
   }
 
   /**

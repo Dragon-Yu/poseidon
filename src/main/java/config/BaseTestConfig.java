@@ -13,17 +13,19 @@ import java.lang.reflect.Field;
 public class BaseTestConfig {
 
   private static final Logger logger = LoggerFactory.getLogger(BaseTestConfig.class);
+  public static final int HTTPS_PORT = 443;
 
   public static int REQUEST_TIMES = 20;
-  public static boolean SSL = true;
   public static String URI = "https://www.google.com";
-  public static String LOG_URL = "https://prometheus-1151.appspot.com/log/api_request";
-  public static final int HTTPS_PORT = 443;
+  public static String API_REQUEST_LOG_URL = "https://prometheus-1151.appspot.com/log/api_request";
+  public static String HTTP2_CHECK_LOG_URL = "https://prometheus-1151.appspot.com/log/http2_check";
+  public static String HOSTS_TO_CHECK = "[\"https://baidu.com\", \"https://google.com\"]";
 
   //variables that can be set by shell environment variable
   private static final String ATTR_URI = "target_url";
-  private static final String ATTR_LOG_URL = "log_url";
+  private static final String ATTR_API_REQUEST_LOG_URL = "api_request_log_url";
   private static final String ATTR_REQUEST_TIMES = "request_times";
+  private static final String ATTR_HOSTS_TO_CHECK = "hosts_to_check";
 
   static {
     for (Field field: BaseTestConfig.class.getDeclaredFields()) {

@@ -23,7 +23,7 @@ public class ClientMain {
     http2Client.run(uri);
 
     Uploader uploader = new Uploader();
-    uploader.upload_http2_vs_http(new ApiRequestData(BaseTestConfig.URI, http2Client.getTimeElapsed(),
+    uploader.uploadHttp2VsHttp(new ApiRequestData(BaseTestConfig.URI, http2Client.getTimeElapsed(),
       httpsClient.getTimeElapsed(), httpsClient.getRequestSize(), httpsClient.getResponseSize(),
       http2Client.getRequestSize(), http2Client.getResponseSize()));
   }
