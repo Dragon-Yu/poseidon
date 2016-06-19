@@ -17,6 +17,8 @@ import main.Http2SupportChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
@@ -34,6 +36,8 @@ public class Http2Client {
   private static long startTime, endTime;
   private static int REQUEST_TIMES = BaseTestConfig.REQUEST_TIMES;
   private Http2ClientInitializer initializer;
+  private SocketAddress localAddress;
+  private SocketAddress remoteAddress;
 
   public void run(URI uri) throws Exception {
     HOST = uri.getHost();
@@ -75,6 +79,8 @@ public class Http2Client {
       // Start the client.
       Channel channel = bootstrap.connect().syncUninterruptibly().channel();
       Http2SupportChecker.logSocketAddress(channel.remoteAddress(), uri);
+      localAddress = channel.localAddress();
+      remoteAddress = channel.remoteAddress();
       logger.info("Connected to [" + HOST + ':' + PORT + ']');
 
       // Wait for the HTTP/2 upgrade to occur.
@@ -108,6 +114,14 @@ public class Http2Client {
       logger.info("shutting down");
       workerGroup.shutdownGracefully();
     }
+  }
+
+  public InetSocketAddress getLocalAddress() {
+    return (InetSocketAddress) localAddress;
+  }
+
+  public InetSocketAddress getRemoteAddress() {
+    return (InetSocketAddress) remoteAddress;
   }
 
   public long getTimeElapsed() {

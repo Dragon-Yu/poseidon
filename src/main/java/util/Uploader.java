@@ -4,6 +4,8 @@ import com.google.gson.GsonBuilder;
 import config.BaseTestConfig;
 import entity.ApiRequestData;
 import entity.Http2CheckResultData;
+import entity.TrafficSize;
+import entity.TrafficSizeData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +34,16 @@ public class Uploader {
   public void uploadHttp2CheckResult(Http2CheckResultData http2CheckResultData) throws IOException {
     String postData = new GsonBuilder().create().toJson(http2CheckResultData);
     URL url = new URL(BaseTestConfig.HTTP2_CHECK_LOG_URL);
+    String response = post(url, postData);
+    logger.info(response);
+  }
+
+  public void uploadTrafficSizeComparison(String targetUrl, TrafficSize httpsTrafficSize, TrafficSize http2TrafficSize)
+    throws IOException {
+    TrafficSizeData data = new TrafficSizeData(targetUrl, httpsTrafficSize.getInput(), httpsTrafficSize.getOutput(),
+      http2TrafficSize.getInput(), http2TrafficSize.getOutput());
+    String postData = new GsonBuilder().create().toJson(data);
+    URL url = new URL(BaseTestConfig.TRAFFIC_SIZE_LOG_URL);
     String response = post(url, postData);
     logger.info(response);
   }

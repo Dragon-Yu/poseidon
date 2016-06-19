@@ -19,6 +19,7 @@ public class BaseTestConfig {
   public static String URI = "https://www.google.com";
   public static String API_REQUEST_LOG_URL = "https://prometheus-1151.appspot.com/log/api_request";
   public static String HTTP2_CHECK_LOG_URL = "https://prometheus-1151.appspot.com/log/http2_check";
+  public static String TRAFFIC_SIZE_LOG_URL = "https://prometheus-1151.appspot.com/log/traffic_size";
   public static String HOSTS_TO_CHECK = "[\"https://baidu.com\", \"https://google.com\"]";
 
   //variables that can be set by shell environment variable

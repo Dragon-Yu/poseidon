@@ -14,6 +14,8 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.net.URI;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -25,6 +27,8 @@ public final class HttpsClient {
   static Logger logger = LoggerFactory.getLogger(HttpsClient.class);
   static AtomicInteger counter = new AtomicInteger(1);
   HttpsInitializer httpsInitializer;
+  SocketAddress remoteAddress;
+  SocketAddress localAddress;
 
   public void run(URI uri) throws Exception {
     int port = uri.getPort() > 0 ? uri.getPort() : BaseTestConfig.HTTPS_PORT;
@@ -48,7 +52,8 @@ public final class HttpsClient {
       // Make the connection attempt.
       startTime = System.nanoTime();
       Channel ch = b.connect(host, port).sync().channel();
-      logger.info("target host: " + ch.remoteAddress());
+      localAddress = ch.localAddress();
+      remoteAddress = ch.remoteAddress();
 
       for (int i = 0; i < BaseTestConfig.REQUEST_TIMES; i++) {
         HttpRequest request = new DefaultFullHttpRequest(
@@ -68,6 +73,14 @@ public final class HttpsClient {
       // Shut down executor threads to exit.
       group.shutdownGracefully();
     }
+  }
+
+  public InetSocketAddress getRemoteAddress() {
+    return (InetSocketAddress) remoteAddress;
+  }
+
+  public InetSocketAddress getLocalAddress() {
+    return (InetSocketAddress) localAddress;
   }
 
   public long getTimeElapsed() {
