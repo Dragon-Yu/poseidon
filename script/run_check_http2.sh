@@ -16,4 +16,6 @@ then
     JAVA_CMD='java'
 fi
 
+export hosts_to_check=`cat data/top500pages.json`
+
 ${JAVA_CMD} -Xbootclasspath/p:./lib/alpn-boot-8.1.4.v20150727.jar -cp poseidon-all-1.0-SNAPSHOT.jar main.Http2SupportChecker

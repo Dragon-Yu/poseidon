@@ -21,3 +21,4 @@ cp ../build/libs/poseidon-all-1.0-SNAPSHOT.jar ../planet_lab
 cp run.sh ../planet_lab
 cp init.sh ../planet_lab
 cp run_*.sh ../planet_lab
+cp -r ../data ../planet_lab

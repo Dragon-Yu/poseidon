@@ -9,6 +9,7 @@ import io.netty.handler.codec.http2.*;
 import io.netty.handler.ssl.ApplicationProtocolNames;
 import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler;
 import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslHandshakeCompletionEvent;
 import io.netty.handler.traffic.ChannelTrafficShapingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,6 +84,19 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
         ctx.close();
         logger.info(ctx.channel().remoteAddress().toString());
         channelPromise.setFailure(new IllegalStateException("unknown protocol: " + protocol));
+      }
+
+      @Override
+      public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        if (evt instanceof SslHandshakeCompletionEvent) {
+          SslHandshakeCompletionEvent event = (SslHandshakeCompletionEvent) evt;
+          if (!event.isSuccess()) {
+            ctx.close();
+            channelPromise.setFailure(event.cause());
+            return;
+          }
+        }
+        super.userEventTriggered(ctx, evt);
       }
     });
   }
