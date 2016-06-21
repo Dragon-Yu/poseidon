@@ -3,7 +3,6 @@ package util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -49,28 +48,28 @@ public class ShellUtil {
   public String getProcessOutputThenInterrupt(int wait, Process process) {
     try {
       Thread.sleep(wait);
+      logger.info("kill process");
       process.destroy();
       Thread.sleep(3000);
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
     }
+    logger.info("interrupt thread");
     processReadingThread.interrupt();
     return processOutput.toString().trim();
   }
 
   private void readIntoStringBuilder(Process process, StringBuilder stringBuilder)
     throws IOException, InterruptedException {
-    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-    String line;
-    while ((line = bufferedReader.readLine()) != null) {
+    InputStreamReader inputStreamReader = new InputStreamReader(process.getInputStream());
+    char[] buff = new char[1000];
+    int len;
+    while ((len = inputStreamReader.read(buff)) > 0) {
       if (Thread.currentThread().isInterrupted()) {
         throw new InterruptedException();
       }
-      if (line.startsWith(" ") || line.startsWith("\t")) {
-        stringBuilder.append(";;;" + line.trim());
-      } else {
-        stringBuilder.append("\n" + line);
-      }
+      stringBuilder.append(buff, 0, len);
     }
+    logger.info("input stream read completed");
   }
 }

@@ -23,6 +23,7 @@ public class TrafficSizeMain {
   static HttpsClient httpsClient = new HttpsClient();
   static Http2Client http2Client = new Http2Client();
   private static Logger logger = LoggerFactory.getLogger(TrafficSizeMain.class);
+  static final int PROCESS_WAITING_TIME = 5000;
 
   public static void main(String[] args) throws Exception {
     URI uri = new URI(BaseTestConfig.URI);
@@ -32,7 +33,7 @@ public class TrafficSizeMain {
     Process process = createTcpdumpProcess(localAddress);
     shellUtil.startReadingFromProcess(process);
     httpsClient.run(uri);
-    String tcpdumpOutput = shellUtil.getProcessOutputThenInterrupt(3000, process);
+    String tcpdumpOutput = shellUtil.getProcessOutputThenInterrupt(PROCESS_WAITING_TIME, process);
     TrafficSize httpsTrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
       httpsClient.getLocalAddress().getAddress().getHostAddress(), httpsClient.getLocalAddress().getPort(),
       httpsClient.getRemoteAddress().getAddress().getHostAddress(), httpsClient.getRemoteAddress().getPort());
@@ -40,19 +41,23 @@ public class TrafficSizeMain {
     process = createTcpdumpProcess(localAddress);
     shellUtil.startReadingFromProcess(process);
     http2Client.run(uri);
-    tcpdumpOutput = shellUtil.getProcessOutputThenInterrupt(3000, process);
+    tcpdumpOutput = shellUtil.getProcessOutputThenInterrupt(PROCESS_WAITING_TIME, process);
     TrafficSize http2TrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
       http2Client.getLocalAddress().getAddress().getHostAddress(), http2Client.getLocalAddress().getPort(),
       http2Client.getRemoteAddress().getAddress().getHostAddress(), http2Client.getRemoteAddress().getPort());
 
-    System.out.println(httpsTrafficSize);
-    System.out.println(http2TrafficSize);
+    logger.info(String.format("Https traffic size(IP): %s", httpsTrafficSize));
+    logger.info(String.format("Https traffic size(TCP), input: %d, output: %d",
+      httpsClient.getResponseSize(), httpsClient.getRequestSize()));
+    logger.info(String.format("Http2 traffic size(IP): %s", http2TrafficSize));
+    logger.info(String.format("Http2 traffic size(TCP), input: %d, output: %d",
+      http2Client.getResponseSize(), http2Client.getRequestSize()));
 
     Uploader uploader = new Uploader();
     uploader.uploadTrafficSizeComparison(BaseTestConfig.URI, httpsTrafficSize, http2TrafficSize);
   }
 
   private static Process createTcpdumpProcess(String localAddress) throws IOException {
-    return Runtime.getRuntime().exec(String.format("sudo tcpdump -nnv ip and host %s", localAddress));
+    return Runtime.getRuntime().exec(String.format("sudo tcpdump -lnnv ip and host %s", localAddress));
   }
 }
