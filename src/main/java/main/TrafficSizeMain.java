@@ -4,6 +4,7 @@ import config.BaseTestConfig;
 import entity.TrafficSize;
 import http2.client.Http2Client;
 import https.client.HttpsClient;
+import network.RedirectionDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.ShellUtil;
@@ -20,13 +21,18 @@ import java.net.URI;
  */
 public class TrafficSizeMain {
 
+  static final int PROCESS_WAITING_TIME = 5000;
   static HttpsClient httpsClient = new HttpsClient();
   static Http2Client http2Client = new Http2Client();
   private static Logger logger = LoggerFactory.getLogger(TrafficSizeMain.class);
-  static final int PROCESS_WAITING_TIME = 5000;
 
   public static void main(String[] args) throws Exception {
     URI uri = new URI(BaseTestConfig.URI);
+    RedirectionDetector redirectionDetector = new RedirectionDetector(uri.toURL());
+    if (redirectionDetector.detect()) {
+      logger.info("redirected to: " + redirectionDetector.getRedirectedUrl());
+      uri = redirectionDetector.getRedirectedUrl().toURI();
+    }
     ShellUtil shellUtil = new ShellUtil();
 
     String localAddress = Inet4Address.getLocalHost().getHostAddress();
@@ -54,10 +60,10 @@ public class TrafficSizeMain {
       http2Client.getResponseSize(), http2Client.getRequestSize()));
 
     Uploader uploader = new Uploader();
-    uploader.uploadTrafficSizeComparison(BaseTestConfig.URI, httpsTrafficSize, http2TrafficSize);
+    uploader.uploadTrafficSizeComparison(uri.toASCIIString(), httpsTrafficSize, http2TrafficSize);
   }
 
   private static Process createTcpdumpProcess(String localAddress) throws IOException {
-    return Runtime.getRuntime().exec(String.format("sudo tcpdump -lnnv ip and host %s", localAddress));
+    return Runtime.getRuntime().exec(String.format(BaseTestConfig.TCPDUMP_CMD, localAddress));
   }
 }
