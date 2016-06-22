@@ -40,6 +40,10 @@ public class TrafficSizeMain {
     shellUtil.startReadingFromProcess(process);
     httpsClient.run(uri);
     String tcpdumpOutput = shellUtil.getProcessOutputThenInterrupt(PROCESS_WAITING_TIME, process);
+    logger.info("tcpdump output size: " + tcpdumpOutput.length());
+    if (BaseTestConfig.LOG_TCPDUMP_OUTPUT) {
+      logger.info(tcpdumpOutput);
+    }
     TrafficSize httpsTrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
       httpsClient.getLocalAddress().getAddress().getHostAddress(), httpsClient.getLocalAddress().getPort(),
       httpsClient.getRemoteAddress().getAddress().getHostAddress(), httpsClient.getRemoteAddress().getPort());
@@ -48,6 +52,10 @@ public class TrafficSizeMain {
     shellUtil.startReadingFromProcess(process);
     http2Client.run(uri);
     tcpdumpOutput = shellUtil.getProcessOutputThenInterrupt(PROCESS_WAITING_TIME, process);
+    logger.info("tcpdump output size: " + tcpdumpOutput.length());
+    if (BaseTestConfig.LOG_TCPDUMP_OUTPUT) {
+      logger.info(tcpdumpOutput);
+    }
     TrafficSize http2TrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
       http2Client.getLocalAddress().getAddress().getHostAddress(), http2Client.getLocalAddress().getPort(),
       http2Client.getRemoteAddress().getAddress().getHostAddress(), http2Client.getRemoteAddress().getPort());

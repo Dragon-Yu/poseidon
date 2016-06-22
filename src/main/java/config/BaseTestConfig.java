@@ -16,6 +16,7 @@ public class BaseTestConfig {
   public static final int HTTPS_PORT = 443;
 
   public static int REQUEST_TIMES = 20;
+  public static boolean LOG_TCPDUMP_OUTPUT = false;
   public static String URI = "https://www.google.com";
   public static String API_REQUEST_LOG_URL = "https://prometheus-1151.appspot.com/log/api_request";
   public static String HTTP2_CHECK_LOG_URL = "https://prometheus-1151.appspot.com/log/http2_check";
@@ -29,6 +30,7 @@ public class BaseTestConfig {
   private static final String ATTR_REQUEST_TIMES = "request_times";
   private static final String ATTR_HOSTS_TO_CHECK = "hosts_to_check";
   private static final String ATTR_TCPDUMP_CMD = "tcpdump_cmd";
+  private static final String ATTR_LOG_TCPDUMP_OUTPUT = "log_tcpdump_output";
 
   static {
     for (Field field: BaseTestConfig.class.getDeclaredFields()) {
