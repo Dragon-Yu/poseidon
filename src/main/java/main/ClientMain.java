@@ -1,8 +1,10 @@
 package main;
 
 import config.BaseTestConfig;
+import entity.ApiRequestData;
 import http2.client.Http2Client;
 import https.client.HttpsClient;
+import util.Uploader;
 
 import java.net.URI;
 
@@ -20,9 +22,9 @@ public class ClientMain {
     httpsClient.run(uri);
     http2Client.run(uri);
 
-//    Uploader uploader = new Uploader();
-//    uploader.uploadHttp2VsHttp(new ApiRequestData(BaseTestConfig.URI, http2Client.getTimeElapsed(),
-//      httpsClient.getTimeElapsed(), httpsClient.getRequestSize(), httpsClient.getResponseSize(),
-//      http2Client.getRequestSize(), http2Client.getResponseSize()));
+    Uploader uploader = new Uploader();
+    uploader.uploadHttp2VsHttp(new ApiRequestData(BaseTestConfig.URI, http2Client.getTimeElapsed(),
+      httpsClient.getTimeElapsed(), httpsClient.getRequestSize(), httpsClient.getResponseSize(),
+      http2Client.getRequestSize(), http2Client.getResponseSize()));
   }
 }
