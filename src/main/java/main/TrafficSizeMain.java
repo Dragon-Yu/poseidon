@@ -48,6 +48,7 @@ public class TrafficSizeMain {
       httpsClient.getLocalAddress().getAddress().getHostAddress(), httpsClient.getLocalAddress().getPort(),
       httpsClient.getRemoteAddress().getAddress().getHostAddress(), httpsClient.getRemoteAddress().getPort());
 
+    shellUtil = new ShellUtil();
     process = createTcpdumpProcess(localAddress);
     shellUtil.startReadingFromProcess(process);
     http2Client.run(uri);
@@ -72,6 +73,8 @@ public class TrafficSizeMain {
   }
 
   private static Process createTcpdumpProcess(String localAddress) throws IOException {
-    return Runtime.getRuntime().exec(String.format(BaseTestConfig.TCPDUMP_CMD, localAddress));
+    String tcpdumpCmd = String.format(BaseTestConfig.TCPDUMP_CMD, localAddress);
+    logger.info("tcpdump cmd: " + tcpdumpCmd);
+    return Runtime.getRuntime().exec(tcpdumpCmd);
   }
 }
