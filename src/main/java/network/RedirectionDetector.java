@@ -1,6 +1,8 @@
 package network;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
@@ -13,6 +15,7 @@ import java.net.URL;
  * Created by Johnson on 16/6/22.
  */
 public class RedirectionDetector {
+  static Logger logger = LoggerFactory.getLogger(RedirectionDetector.class);
   private URL url;
   private URL redirectedUrl;
 
@@ -27,6 +30,14 @@ public class RedirectionDetector {
       System.out.println(detector.getRedirectedUrl());
       System.out.println(detector.getRedirectedUrl().toURI().toASCIIString());
     }
+  }
+
+  public URL autoRedirect() throws IOException, URISyntaxException {
+    if (detect()) {
+      logger.info("redirected to: " + getRedirectedUrl());
+      return getRedirectedUrl();
+    }
+    return url;
   }
 
   public boolean detect() throws IOException, URISyntaxException {

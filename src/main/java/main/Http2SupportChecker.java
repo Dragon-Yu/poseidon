@@ -5,6 +5,7 @@ import config.BaseTestConfig;
 import entity.Http2CheckResultData;
 import http2.client.Http2Client;
 import io.netty.channel.ConnectTimeoutException;
+import network.RedirectionDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.Uploader;
@@ -50,6 +51,7 @@ public class Http2SupportChecker {
     String[] uris = gson.fromJson(BaseTestConfig.HOSTS_TO_CHECK, String[].class);
     for (String uriStr : uris) {
       URI uri = new URI(uriStr);
+      uri = new RedirectionDetector(uri.toURL()).autoRedirect().toURI();
       try {
         http2SupportChecker.connect(uri);
       } catch (ConnectTimeoutException e) {
@@ -63,7 +65,7 @@ public class Http2SupportChecker {
           reportError(uri, e.getMessage());
         }
       }
-      uploader.uploadHttp2CheckResult(new Http2CheckResultData(uriStr, !errorsMap.containsKey(uri), errorsMap.get(uri)));
+      uploader.uploadHttp2CheckResult(new Http2CheckResultData(uri.toASCIIString(), !errorsMap.containsKey(uri), errorsMap.get(uri)));
     }
     logger.info(gson.toJson(errorsMap));
   }

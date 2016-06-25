@@ -28,11 +28,7 @@ public class TrafficSizeMain {
 
   public static void main(String[] args) throws Exception {
     URI uri = new URI(BaseTestConfig.URI);
-    RedirectionDetector redirectionDetector = new RedirectionDetector(uri.toURL());
-    if (redirectionDetector.detect()) {
-      logger.info("redirected to: " + redirectionDetector.getRedirectedUrl());
-      uri = redirectionDetector.getRedirectedUrl().toURI();
-    }
+    uri = new RedirectionDetector(uri.toURL()).autoRedirect().toURI();
     ShellUtil shellUtil = new ShellUtil();
 
     String localAddress = Inet4Address.getLocalHost().getHostAddress();
