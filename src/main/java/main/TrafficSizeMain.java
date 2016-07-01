@@ -43,6 +43,7 @@ public class TrafficSizeMain {
     TrafficSize httpsTrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
       httpsClient.getLocalAddress().getAddress().getHostAddress(), httpsClient.getLocalAddress().getPort(),
       httpsClient.getRemoteAddress().getAddress().getHostAddress(), httpsClient.getRemoteAddress().getPort());
+    TrafficSize httpsTrafficSizeTcp = new TrafficSize(httpsClient.getResponseSize(), httpsClient.getRequestSize());
 
     shellUtil = new ShellUtil();
     process = createTcpdumpProcess(localAddress);
@@ -56,6 +57,7 @@ public class TrafficSizeMain {
     TrafficSize http2TrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
       http2Client.getLocalAddress().getAddress().getHostAddress(), http2Client.getLocalAddress().getPort(),
       http2Client.getRemoteAddress().getAddress().getHostAddress(), http2Client.getRemoteAddress().getPort());
+    TrafficSize http2TrafficSizeTcp = new TrafficSize(http2Client.getResponseSize(), http2Client.getRequestSize());
 
     logger.info(String.format("Https traffic size(IP): %s", httpsTrafficSize));
     logger.info(String.format("Https traffic size(TCP), input: %d, output: %d",
@@ -65,7 +67,8 @@ public class TrafficSizeMain {
       http2Client.getResponseSize(), http2Client.getRequestSize()));
 
     Uploader uploader = new Uploader();
-    uploader.uploadTrafficSizeComparison(uri.toASCIIString(), httpsTrafficSize, http2TrafficSize);
+    uploader.uploadTrafficSizeComparison(uri.toASCIIString(), httpsTrafficSize, http2TrafficSize,
+      httpsTrafficSizeTcp, http2TrafficSizeTcp);
   }
 
   private static Process createTcpdumpProcess(String localAddress) throws IOException {

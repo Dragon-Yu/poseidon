@@ -38,10 +38,12 @@ public class Uploader {
     logger.info(response);
   }
 
-  public void uploadTrafficSizeComparison(String targetUrl, TrafficSize httpsTrafficSize, TrafficSize http2TrafficSize)
+  public void uploadTrafficSizeComparison(String targetUrl, TrafficSize httpsTrafficSize, TrafficSize http2TrafficSize,
+                                          TrafficSize httpsTrafficSizeTcp, TrafficSize http2TrafficSizeTcp)
     throws IOException {
     TrafficSizeData data = new TrafficSizeData(targetUrl, httpsTrafficSize.getInput(), httpsTrafficSize.getOutput(),
-      http2TrafficSize.getInput(), http2TrafficSize.getOutput());
+      http2TrafficSize.getInput(), http2TrafficSize.getOutput(), httpsTrafficSizeTcp.getInput(),
+      httpsTrafficSizeTcp.getOutput(), http2TrafficSizeTcp.getInput(), http2TrafficSizeTcp.getOutput());
     String postData = new GsonBuilder().create().toJson(data);
     URL url = new URL(BaseTestConfig.TRAFFIC_SIZE_LOG_URL);
     String response = post(url, postData);
