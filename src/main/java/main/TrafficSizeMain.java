@@ -21,9 +21,9 @@ import java.net.URI;
  */
 public class TrafficSizeMain {
 
-  static final int PROCESS_WAITING_TIME = 5000;
-  static HttpsClient httpsClient = new HttpsClient();
-  static Http2Client http2Client = new Http2Client();
+  private static final int PROCESS_WAITING_TIME = 5000;
+  private static HttpsClient httpsClient = new HttpsClient();
+  private static Http2Client http2Client = new Http2Client();
   private static Logger logger = LoggerFactory.getLogger(TrafficSizeMain.class);
 
   public static void main(String[] args) throws Exception {
@@ -35,7 +35,7 @@ public class TrafficSizeMain {
     Process process = createTcpdumpProcess(localAddress);
     shellUtil.startReadingFromProcess(process);
     httpsClient.run(uri);
-    String tcpdumpOutput = shellUtil.getProcessOutputThenInterrupt(PROCESS_WAITING_TIME, process);
+    String tcpdumpOutput = shellUtil.getProcessOutputThenInterrupt(PROCESS_WAITING_TIME, process, "tcpdump");
     logger.info("tcpdump output size: " + tcpdumpOutput.length());
     if (BaseTestConfig.LOG_TCPDUMP_OUTPUT) {
       logger.info(tcpdumpOutput);
@@ -49,7 +49,7 @@ public class TrafficSizeMain {
     process = createTcpdumpProcess(localAddress);
     shellUtil.startReadingFromProcess(process);
     http2Client.run(uri);
-    tcpdumpOutput = shellUtil.getProcessOutputThenInterrupt(PROCESS_WAITING_TIME, process);
+    tcpdumpOutput = shellUtil.getProcessOutputThenInterrupt(PROCESS_WAITING_TIME, process, "tcpdump");
     logger.info("tcpdump output size: " + tcpdumpOutput.length());
     if (BaseTestConfig.LOG_TCPDUMP_OUTPUT) {
       logger.info(tcpdumpOutput);

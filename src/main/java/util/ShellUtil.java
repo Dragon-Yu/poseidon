@@ -1,8 +1,10 @@
 package util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -26,7 +28,7 @@ public class ShellUtil {
     return stringBuilder.toString().trim();
   }
 
-  public void startReadingFromProcess(Process process) {
+  public void startReadingFromProcess(final Process process) {
     processOutput = new StringBuilder();
     processReadingThread = new Thread() {
       @Override
@@ -45,11 +47,14 @@ public class ShellUtil {
     processReadingThread.start();
   }
 
-  public String getProcessOutputThenInterrupt(int wait, Process process) {
+  public String getProcessOutputThenInterrupt(int wait, Process process, String processName) {
     try {
       Thread.sleep(wait);
       logger.info("kill process");
       process.destroy();
+      if (!StringUtils.isEmpty(processName)) {
+        killProcess(processName);
+      }
       Thread.sleep(3000);
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
@@ -59,16 +64,19 @@ public class ShellUtil {
     return processOutput.toString().trim();
   }
 
+  private void killProcess(String process) throws IOException {
+    Runtime.getRuntime().exec(String.format("sudo kill -9 `ps -ef|grep %s| awk '{print $2}'`", process));
+  }
+
   private void readIntoStringBuilder(Process process, StringBuilder stringBuilder)
     throws IOException, InterruptedException {
-    InputStreamReader inputStreamReader = new InputStreamReader(process.getInputStream());
-    char[] buff = new char[1000];
-    int len;
-    while ((len = inputStreamReader.read(buff)) > 0) {
+    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+    String line;
+    while ((line = reader.readLine()) != null) {
       if (Thread.currentThread().isInterrupted()) {
         throw new InterruptedException();
       }
-      stringBuilder.append(buff, 0, len);
+      stringBuilder.append(line + "\n");
     }
     logger.info("input stream read completed");
   }
