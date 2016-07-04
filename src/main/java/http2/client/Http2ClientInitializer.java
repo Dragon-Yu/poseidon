@@ -75,6 +75,7 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
     pipeline.addLast(new ApplicationProtocolNegotiationHandler("") {
       @Override
       protected void configurePipeline(ChannelHandlerContext ctx, String protocol) {
+        logger.info("protocol: " + protocol);
         if (ApplicationProtocolNames.HTTP_2.equals(protocol)) {
           ChannelPipeline p = ctx.pipeline();
           p.addLast(connectionHandler);
