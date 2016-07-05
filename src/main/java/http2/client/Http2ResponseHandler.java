@@ -7,7 +7,6 @@ import io.netty.channel.ChannelPromise;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http2.HttpConversionUtil;
-import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +62,7 @@ public class Http2ResponseHandler extends SimpleChannelInboundHandler<FullHttpRe
       if (!promise.isSuccess()) {
         throw new RuntimeException(promise.cause());
       }
-      logger.info("---Stream id: " + entry.getKey() + " received---");
+//      logger.info("---Stream id: " + entry.getKey() + " received---");
       itr.remove();
     }
   }
@@ -86,7 +85,7 @@ public class Http2ResponseHandler extends SimpleChannelInboundHandler<FullHttpRe
         int contentLength = content.readableBytes();
         byte[] arr = new byte[contentLength];
         content.readBytes(arr);
-        logger.info(String.valueOf(new String(arr, 0, contentLength, CharsetUtil.UTF_8).length()));
+//        logger.info(String.valueOf(new String(arr, 0, contentLength, CharsetUtil.UTF_8).length()));
       }
       entry.getValue().setSuccess();
     }

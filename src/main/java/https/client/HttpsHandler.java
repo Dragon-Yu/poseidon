@@ -20,7 +20,6 @@ import config.BaseTestConfig;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
-import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,19 +31,19 @@ public class HttpsHandler extends SimpleChannelInboundHandler<HttpObject> {
   public void channelRead0(ChannelHandlerContext ctx, HttpObject msg) {
     if (msg instanceof HttpResponse) {
       HttpResponse response = (HttpResponse) msg;
-      logger.info("STATUS: " + response.status());
-      logger.info("VERSION: " + response.protocolVersion());
+//      logger.info("STATUS: " + response.status());
+//      logger.info("VERSION: " + response.protocolVersion());
       if (HttpUtil.isTransferEncodingChunked(response)) {
-        logger.info("CHUNKED CONTENT {");
+//        logger.info("CHUNKED CONTENT {");
       } else {
-        logger.info("CONTENT {");
+//        logger.info("CONTENT {");
       }
     }
     if (msg instanceof HttpContent) {
       HttpContent content = (HttpContent) msg;
-      logger.info(String.valueOf(content.content().toString(CharsetUtil.UTF_8).length()));
+//      logger.info(String.valueOf(content.content().toString(CharsetUtil.UTF_8).length()));
       if (content instanceof LastHttpContent) {
-        logger.info("} END OF CONTENT");
+//        logger.info("} END OF CONTENT");
         HttpsClient.counter.getAndAdd(1);
       }
     }
