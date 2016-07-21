@@ -7,23 +7,20 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http2.Http2SecurityUtil;
-import io.netty.handler.codec.http2.HttpConversionUtil;
 import io.netty.handler.ssl.*;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import io.netty.util.AsciiString;
 import main.Http2SupportChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.RequestUtil;
 
 import java.net.InetSocketAddress;
+import java.net.MalformedURLException;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
-
-import static io.netty.handler.codec.http.HttpMethod.GET;
-import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
  * Http2 client starter
@@ -35,7 +32,7 @@ public class Http2Client {
   private static Logger logger = LoggerFactory.getLogger(Http2Client.class);
   private static long startTime, endTime;
   private static int REQUEST_TIMES = BaseTestConfig.REQUEST_TIMES;
-  private Http2ClientInitializer initializer;
+  protected Http2ClientInitializer initializer;
   private SocketAddress localAddress;
   private SocketAddress remoteAddress;
 
@@ -63,7 +60,7 @@ public class Http2Client {
 
 
     EventLoopGroup workerGroup = new NioEventLoopGroup();
-    initializer = new Http2ClientInitializer(sslCtx, Integer.MAX_VALUE);
+    initializer = generateInitializer(sslCtx, Integer.MAX_VALUE);
 
     try {
       // Configure the client.
@@ -88,20 +85,7 @@ public class Http2Client {
       http2SettingsHandler.awaitSettings(60, TimeUnit.SECONDS);
 
       Http2ResponseHandler responseHandler = initializer.responseHandler();
-      int streamId = 3;
-      HttpScheme scheme = HttpScheme.HTTPS;
-      AsciiString hostName = new AsciiString(HOST + ':' + PORT);
-      logger.info("Sending request(s)...");
-      for (int i = 0; i < REQUEST_TIMES; i++) {
-        // Create a simple GET request.
-        FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, GET, uri.toString());
-        request.headers().add(HttpHeaderNames.HOST, hostName);
-        request.headers().add(HttpConversionUtil.ExtensionHeaderNames.SCHEME.text(), scheme.name());
-        request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
-        request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.DEFLATE);
-        responseHandler.put(streamId, channel.writeAndFlush(request), channel.newPromise());
-        streamId += 2;
-      }
+      sendInitRequests(responseHandler, channel, uri);
       responseHandler.awaitResponses(300, TimeUnit.SECONDS);
       logger.info("Finished HTTP/2 request(s)");
 
@@ -114,6 +98,24 @@ public class Http2Client {
       logger.info("shutting down");
       workerGroup.shutdownGracefully();
     }
+  }
+
+  public void sendInitRequests(Http2ResponseHandler responseHandler, Channel channel, URI uri)
+    throws MalformedURLException {
+    logger.info("Sending request(s)...");
+    for (int i = 0; i < REQUEST_TIMES; i++) {
+      // Create a simple GET request.
+      FullHttpRequest request = RequestUtil.generateHttpRequest(uri.toURL());
+      responseHandler.put(RequestUtil.getStreamId(request), channel.writeAndFlush(request), channel.newPromise());
+    }
+  }
+
+  public void setRequestTimes(int requestTimes) {
+    REQUEST_TIMES = requestTimes;
+  }
+
+  public Http2ClientInitializer generateInitializer(SslContext sslCtx, int maxContentLength) {
+    return new Http2ClientInitializer(sslCtx, maxContentLength);
   }
 
   public InetSocketAddress getLocalAddress() {

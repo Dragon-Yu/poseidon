@@ -21,6 +21,8 @@ dependencies {
     compile 'joda-time:joda-time:2.9.2'
     compile group: 'com.google.code.gson', name: 'gson', version: '2.6.2'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+    compile group: 'org.jsoup', name: 'jsoup', version: '1.9.2'
+    compile group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.5'
 }
 
 task fatJar(type: Jar) {

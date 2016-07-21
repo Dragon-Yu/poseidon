@@ -51,6 +51,10 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
     configureSsl(ch, channelPromise);
   }
 
+  public void setResponseHandler(Http2ResponseHandler responseHandler) {
+    this.responseHandler = responseHandler;
+  }
+
   public Http2ResponseHandler responseHandler() {
     return responseHandler;
   }
