@@ -1,5 +1,6 @@
 package entity;
 
+import com.google.gson.JsonElement;
 import com.google.gson.annotations.SerializedName;
 import util.ShellUtil;
 
@@ -41,11 +42,22 @@ public class FullWebData {
   @SerializedName("http2_request_size_tcp")
   private long http2RequestSizeTcp;
 
-  private String[] links;
+  @SerializedName("https_traces")
+  private JsonElement httpsTraces;
+
+  @SerializedName("http2_traces")
+  private JsonElement http2Traces;
+
+  @SerializedName("http2_transfer_time")
+  private long http2TransferTime;
+
+  @SerializedName("https_transfer_time")
+  private long httpsTransferTime;
 
   public FullWebData(String targetUrl, long httpsResponseSize, long httpsRequestSize, long http2ResponseSize,
                      long http2RequestSize, long httpsResponseSizeTcp, long httpsRequestSizeTcp,
-                     long http2ResponseSizeTcp, long http2RequestSizeTcp, String[] links) {
+                     long http2ResponseSizeTcp, long http2RequestSizeTcp, JsonElement httpsTraces,
+                     JsonElement http2Traces, long httpsTransferTime, long http2TransferTime) {
     this.targetUrl = targetUrl;
     this.httpsResponseSize = httpsResponseSize;
     this.httpsRequestSize = httpsRequestSize;
@@ -55,7 +67,10 @@ public class FullWebData {
     this.httpsRequestSizeTcp = httpsRequestSizeTcp;
     this.http2ResponseSizeTcp = http2ResponseSizeTcp;
     this.http2RequestSizeTcp = http2RequestSizeTcp;
-    this.links = links;
+    this.httpsTraces = httpsTraces;
+    this.http2Traces = http2Traces;
+    this.httpsTransferTime = httpsTransferTime;
+    this.http2TransferTime = http2TransferTime;
 
     timeStamp = System.currentTimeMillis();
     hostName = new ShellUtil().exec("hostname");

@@ -16,10 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.RequestUtil;
 
-import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
-import java.net.SocketAddress;
-import java.net.URI;
+import java.net.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -103,10 +100,11 @@ public class Http2Client {
   public void sendInitRequests(Http2ResponseHandler responseHandler, Channel channel, URI uri)
     throws MalformedURLException {
     logger.info("Sending request(s)...");
+    URL url = uri.toURL();
     for (int i = 0; i < REQUEST_TIMES; i++) {
       // Create a simple GET request.
-      FullHttpRequest request = RequestUtil.generateHttpRequest(uri.toURL());
-      responseHandler.put(RequestUtil.getStreamId(request), channel.writeAndFlush(request), channel.newPromise());
+      FullHttpRequest request = RequestUtil.generateHttp2Request(url);
+      responseHandler.put(RequestUtil.getStreamId(request), url, channel.writeAndFlush(request), channel.newPromise());
     }
   }
 

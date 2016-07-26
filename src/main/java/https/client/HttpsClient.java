@@ -7,26 +7,29 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.RequestUtil;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.URI;
+import java.net.URL;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A simple HTTP client that prints out the content of the HTTP response to
  */
-public final class HttpsClient {
+public class HttpsClient {
   static long startTime, endTime;
   static Logger logger = LoggerFactory.getLogger(HttpsClient.class);
   static AtomicInteger counter = new AtomicInteger(1);
-  HttpsInitializer httpsInitializer;
+  protected int requestTimes = BaseTestConfig.REQUEST_TIMES;
+  protected HttpsInitializer httpsInitializer;
   SocketAddress remoteAddress;
   SocketAddress localAddress;
 
@@ -41,7 +44,7 @@ public final class HttpsClient {
 
     // Configure the client.
     EventLoopGroup group = new NioEventLoopGroup();
-    httpsInitializer = new HttpsInitializer(sslCtx);
+    httpsInitializer = generateHttpsInitializer(sslCtx);
     try {
       Bootstrap b = new Bootstrap();
       b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
@@ -55,14 +58,7 @@ public final class HttpsClient {
       localAddress = ch.localAddress();
       remoteAddress = ch.remoteAddress();
 
-      for (int i = 0; i < BaseTestConfig.REQUEST_TIMES; i++) {
-        HttpRequest request = new DefaultFullHttpRequest(
-          HttpVersion.HTTP_1_1, HttpMethod.GET, uri.getRawPath());
-        request.headers().set(HttpHeaderNames.HOST, host);
-        request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-        request.headers().set(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
-        ch.writeAndFlush(request);
-      }
+      sendRequests(uri.toURL(), ch);
 
       // Wait for the server to close the connection.
       ch.closeFuture().sync();
@@ -73,6 +69,17 @@ public final class HttpsClient {
       // Shut down executor threads to exit.
       group.shutdownGracefully();
     }
+  }
+
+  protected void sendRequests(URL url, Channel channel) {
+    for (int i = 0; i < requestTimes; i++) {
+      HttpRequest request = RequestUtil.generateHttpsRequest(url);
+      channel.writeAndFlush(request);
+    }
+  }
+
+  protected HttpsInitializer generateHttpsInitializer(SslContext sslContext) {
+    return new HttpsInitializer(sslContext);
   }
 
   public InetSocketAddress getRemoteAddress() {

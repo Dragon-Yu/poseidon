@@ -71,7 +71,7 @@ public class TrafficSizeMain {
       httpsTrafficSizeTcp, http2TrafficSizeTcp);
   }
 
-  private static Process createTcpdumpProcess(String localAddress) throws IOException {
+  public static Process createTcpdumpProcess(String localAddress) throws IOException {
     String tcpdumpCmd = String.format(BaseTestConfig.TCPDUMP_CMD, localAddress);
     logger.info("tcpdump cmd: " + tcpdumpCmd);
     return Runtime.getRuntime().exec(tcpdumpCmd);

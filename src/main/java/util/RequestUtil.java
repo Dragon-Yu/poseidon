@@ -20,13 +20,21 @@ public class RequestUtil {
     return streamId.getAndAdd(2);
   }
 
-  public static FullHttpRequest generateHttpRequest(URL url) {
+  public static FullHttpRequest generateHttp2Request(URL url) {
     FullHttpRequest request = new DefaultFullHttpRequest(HTTP_1_1, GET, url.toString());
     request.headers().add(HttpHeaderNames.HOST, url.getHost());
     request.headers().add(HttpConversionUtil.ExtensionHeaderNames.SCHEME.text(), HttpScheme.HTTPS);
     request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
     request.headers().add(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.DEFLATE);
     request.headers().add(HttpConversionUtil.ExtensionHeaderNames.STREAM_ID.text(), getStreamId());
+    return request;
+  }
+
+  public static HttpRequest generateHttpsRequest(URL url) {
+    HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, url.toString());
+    request.headers().set(HttpHeaderNames.HOST, url.getHost());
+    request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+    request.headers().set(HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
     return request;
   }
 

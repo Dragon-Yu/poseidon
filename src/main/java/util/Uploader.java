@@ -1,11 +1,9 @@
 package util;
 
-import com.google.gson.GsonBuilder;
+import com.google.gson.Gson;
 import config.BaseTestConfig;
-import entity.ApiRequestData;
-import entity.Http2CheckResultData;
-import entity.TrafficSize;
-import entity.TrafficSizeData;
+import entity.*;
+import fullweb.TraceInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 /**
  * Uploader util
@@ -25,14 +24,14 @@ public class Uploader {
   private static Logger logger = LoggerFactory.getLogger(Uploader.class);
 
   public void uploadHttp2VsHttp(ApiRequestData apiRequestData) throws IOException {
-    String postData = new GsonBuilder().create().toJson(apiRequestData);
+    String postData = new Gson().toJson(apiRequestData);
     URL url = new URL(BaseTestConfig.API_REQUEST_LOG_URL);
     String response = post(url, postData);
     logger.info(response);
   }
 
   public void uploadHttp2CheckResult(Http2CheckResultData http2CheckResultData) throws IOException {
-    String postData = new GsonBuilder().create().toJson(http2CheckResultData);
+    String postData = new Gson().toJson(http2CheckResultData);
     URL url = new URL(BaseTestConfig.HTTP2_CHECK_LOG_URL);
     String response = post(url, postData);
     logger.info(response);
@@ -44,10 +43,24 @@ public class Uploader {
     TrafficSizeData data = new TrafficSizeData(targetUrl, httpsTrafficSize.getInput(), httpsTrafficSize.getOutput(),
       http2TrafficSize.getInput(), http2TrafficSize.getOutput(), httpsTrafficSizeTcp.getInput(),
       httpsTrafficSizeTcp.getOutput(), http2TrafficSizeTcp.getInput(), http2TrafficSizeTcp.getOutput());
-    String postData = new GsonBuilder().create().toJson(data);
+    String postData = new Gson().toJson(data);
     URL url = new URL(BaseTestConfig.TRAFFIC_SIZE_LOG_URL);
     String response = post(url, postData);
     logger.info(response);
+  }
+
+  public void uploadFullWebRequest(String targetUrl, List<TraceInfo> httpsTraces,
+                                   List<TraceInfo> http2Traces, TrafficSize httpsTrafficSize,
+                                   TrafficSize http2TrafficSize, TrafficSize httpsTrafficSizeTcp,
+                                   TrafficSize http2TrafficSizeTcp, long httpsTime, long http2Time) throws IOException {
+    FullWebData data = new FullWebData(targetUrl, httpsTrafficSize.getInput(), httpsTrafficSize.getOutput(),
+      http2TrafficSize.getInput(), http2TrafficSize.getOutput(), httpsTrafficSizeTcp.getInput(),
+      httpsTrafficSizeTcp.getOutput(), http2TrafficSizeTcp.getInput(), http2TrafficSizeTcp.getOutput(),
+      new Gson().toJsonTree(httpsTraces), new Gson().toJsonTree(http2Traces), httpsTime, http2Time);
+    URL url = new URL(BaseTestConfig.FULL_WEB_LOG_URL);
+    logger.info(new Gson().toJson(data));
+//    String response = post(url, new Gson().toJson(data));
+//    logger.info(response);
   }
 
   private String post(URL url, String postData) throws IOException {

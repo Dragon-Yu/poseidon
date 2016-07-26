@@ -12,13 +12,14 @@ import org.apache.http.entity.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URL;
 import java.util.AbstractMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by johnson on 16/1/11.
@@ -26,9 +27,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Http2ResponseHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
   static Logger logger = LoggerFactory.getLogger(Http2ResponseHandler.class);
 
-  private AtomicInteger steamId = new AtomicInteger(3);
-
   private SortedMap<Integer, Map.Entry<ChannelFuture, ChannelPromise>> streamIdPromiseMap;
+  private Map<Integer, URL> streamIdUrlMap = new ConcurrentHashMap<>();
 
   public Http2ResponseHandler() {
     streamIdPromiseMap = new ConcurrentSkipListMap<>();
@@ -44,6 +44,11 @@ public class Http2ResponseHandler extends SimpleChannelInboundHandler<FullHttpRe
    * @see Http2ResponseHandler#awaitResponses(long, java.util.concurrent.TimeUnit)
    */
   public Map.Entry<ChannelFuture, ChannelPromise> put(int streamId, ChannelFuture writeFuture, ChannelPromise promise) {
+    return streamIdPromiseMap.put(streamId, new AbstractMap.SimpleEntry<>(writeFuture, promise));
+  }
+
+  public Map.Entry<ChannelFuture, ChannelPromise> put(int streamId, URL url, ChannelFuture writeFuture, ChannelPromise promise) {
+    streamIdUrlMap.put(streamId, url);
     return streamIdPromiseMap.put(streamId, new AbstractMap.SimpleEntry<>(writeFuture, promise));
   }
 
@@ -76,6 +81,10 @@ public class Http2ResponseHandler extends SimpleChannelInboundHandler<FullHttpRe
     }
   }
 
+  protected void onResponseReceived(ChannelHandlerContext ctx, URL url) {
+
+  }
+
   @Override
   protected void channelRead0(ChannelHandlerContext ctx, FullHttpResponse msg) throws Exception {
     Integer streamId = msg.headers().getInt(HttpConversionUtil.ExtensionHeaderNames.STREAM_ID.text());
@@ -83,7 +92,7 @@ public class Http2ResponseHandler extends SimpleChannelInboundHandler<FullHttpRe
       logger.error("HttpResponseHandler unexpected message received: " + msg);
       return;
     }
-
+    onResponseReceived(ctx, streamIdUrlMap.get(streamId));
     Map.Entry<ChannelFuture, ChannelPromise> entry = streamIdPromiseMap.get(streamId);
     if (entry == null) {
       logger.error("Message received for unknown stream id " + streamId);

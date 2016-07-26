@@ -3,7 +3,6 @@ package fullweb;
 import http2.client.Http2ResponseHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +25,8 @@ public class FullWebHttp2ResponseHandler extends Http2ResponseHandler {
   }
 
   @Override
-  protected void channelRead0(ChannelHandlerContext ctx, FullHttpResponse msg) throws Exception {
-    super.channelRead0(ctx, msg);
+  protected void onResponseReceived(ChannelHandlerContext ctx, URL url) {
+    traceController.completeVisit(ctx.channel(), url);
   }
 
   @Override
@@ -48,15 +47,9 @@ public class FullWebHttp2ResponseHandler extends Http2ResponseHandler {
         logger.warn("Ignore outer resource: " + url.toString());
         continue;
       }
-      traceController.visitUrl(url);
-      FullHttpRequest request = RequestUtil.generateHttpRequest(url);
-      put(RequestUtil.getStreamId(request), ctx.channel().writeAndFlush(request), ctx.channel().newPromise());
+      traceController.visitUrl(url, ctx.channel());
+      FullHttpRequest request = RequestUtil.generateHttp2Request(url);
+      put(RequestUtil.getStreamId(request), url, ctx.channel().writeAndFlush(request), ctx.channel().newPromise());
     }
-  }
-
-  public interface TraceController {
-    boolean urlVisited(URL url);
-
-    void visitUrl(URL url);
   }
 }

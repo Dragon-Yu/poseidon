@@ -14,19 +14,21 @@ package https.client;/*
  * under the License.
  */
 
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
+import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.traffic.ChannelTrafficShapingHandler;
+import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HttpsInitializer extends ChannelInitializer<SocketChannel> {
 
   private final SslContext sslCtx;
+  protected HttpsHandler httpsHandler = new HttpsHandler();
   Logger logger = LoggerFactory.getLogger(HttpsInitializer.class);
   ChannelTrafficShapingHandler channelTrafficShapingHandler = new ChannelTrafficShapingHandler(10);
 
@@ -47,12 +49,19 @@ public class HttpsInitializer extends ChannelInitializer<SocketChannel> {
 
     p.addLast(new HttpClientCodec());
 
+    p.addLast(new ChannelOutboundHandlerAdapter() {
+      @Override
+      public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+        if (msg instanceof DefaultFullHttpRequest) {
+          DefaultFullHttpRequest request = (DefaultFullHttpRequest) msg;
+          ctx.attr(AttributeKey.valueOf("test")).set(request.uri());
+        }
+        super.write(ctx, msg, promise);
+      }
+    });
+
     // Remove the following line if you don't want automatic content decompression.
     p.addLast(new HttpContentDecompressor());
-
-    // Uncomment the following line if you don't want to handle HttpContents.
-    //p.addLast(new HttpObjectAggregator(1048576));
-
-    p.addLast(new HttpsHandler());
+    p.addLast(httpsHandler);
   }
 }
