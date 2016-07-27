@@ -58,9 +58,8 @@ public class Uploader {
       httpsTrafficSizeTcp.getOutput(), http2TrafficSizeTcp.getInput(), http2TrafficSizeTcp.getOutput(),
       new Gson().toJsonTree(httpsTraces), new Gson().toJsonTree(http2Traces), httpsTime, http2Time);
     URL url = new URL(BaseTestConfig.FULL_WEB_LOG_URL);
-    logger.info(new Gson().toJson(data));
-//    String response = post(url, new Gson().toJson(data));
-//    logger.info(response);
+    String response = post(url, new Gson().toJson(data));
+    logger.info(response);
   }
 
   private String post(URL url, String postData) throws IOException {
