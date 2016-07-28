@@ -31,4 +31,12 @@ public class TraceInfo {
     this.responseTimeStamp = responseTimeStamp;
     timeElapsed = responseTimeStamp - requestTimeStamp;
   }
+
+  @Override
+  public String toString() {
+    return "TraceInfo{" +
+      "timeElapsed=" + timeElapsed +
+      ", url=" + url +
+      '}';
+  }
 }
