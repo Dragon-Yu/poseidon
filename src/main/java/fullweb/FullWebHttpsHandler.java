@@ -22,8 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class FullWebHttpsHandler extends HttpsHandler {
   private static Logger logger = LoggerFactory.getLogger(FullWebHttpsHandler.class);
+  protected TraceController traceController;
   private Map<Channel, FullWebContext> channelFullWebContextMap = new ConcurrentHashMap<>();
-  private TraceController traceController;
 
   public FullWebHttpsHandler(TraceController traceController) {
     this.traceController = traceController;
@@ -53,6 +53,7 @@ public class FullWebHttpsHandler extends HttpsHandler {
         content.readBytes(bytes);
         handleContent(bytes, ctx,
           ContentType.parse(context.getHttpMessage().headers().get(HttpHeaderNames.CONTENT_TYPE)));
+        traceController.onContentHandled();
         content.clear();
       }
     }
@@ -80,10 +81,13 @@ public class FullWebHttpsHandler extends HttpsHandler {
         logger.warn("Ignore outer resource: " + url.toString());
         continue;
       }
-      traceController.visitUrl(url, ctx.channel());
-      FullHttpRequest request = RequestUtil.generateHttp2Request(url);
-      ctx.channel().writeAndFlush(request);
+      sendRequest(url, ctx);
     }
   }
 
+  protected void sendRequest(URL url, ChannelHandlerContext ctx) {
+    traceController.visitUrl(url, ctx.channel());
+    HttpRequest request = RequestUtil.generateHttpsRequest(url);
+    ctx.channel().writeAndFlush(request);
+  }
 }

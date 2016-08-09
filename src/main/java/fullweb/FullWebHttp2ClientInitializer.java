@@ -53,4 +53,8 @@ public class FullWebHttp2ClientInitializer extends Http2ClientInitializer implem
   public void completeVisit(Channel channel, URL url) {
     tracerInfoMap.get(url).setResponseTimeStamp(System.nanoTime());
   }
+
+  @Override
+  public void onContentHandled() {
+  }
 }

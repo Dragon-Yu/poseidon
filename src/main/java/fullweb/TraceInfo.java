@@ -12,6 +12,9 @@ public class TraceInfo {
   private transient long requestTimeStamp;
   private transient long responseTimeStamp;
 
+  @SerializedName("channel_id")
+  private String channelId;
+
   @SerializedName("time_elapsed")
   private long timeElapsed;
 
@@ -19,6 +22,17 @@ public class TraceInfo {
   private URL url;
 
   public TraceInfo(URL url) {
+    this.url = url;
+  }
+
+  public TraceInfo(URL url, long requestTimeStamp) {
+    this.requestTimeStamp = requestTimeStamp;
+    this.url = url;
+  }
+
+  public TraceInfo(URL url, long requestTimeStamp, String channelId) {
+    this.requestTimeStamp = requestTimeStamp;
+    this.channelId = channelId;
     this.url = url;
   }
 
@@ -35,7 +49,8 @@ public class TraceInfo {
   @Override
   public String toString() {
     return "TraceInfo{" +
-      "timeElapsed=" + timeElapsed +
+      "channelId='" + channelId + '\'' +
+      ", timeElapsed=" + timeElapsed +
       ", url=" + url +
       '}';
   }

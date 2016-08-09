@@ -56,4 +56,8 @@ public class FullWebHttpsInitializer extends HttpsInitializer implements TraceCo
     }
     return tracer;
   }
+
+  @Override
+  public void onContentHandled() {
+  }
 }

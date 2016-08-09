@@ -13,4 +13,6 @@ public interface TraceController {
   void visitUrl(URL url, Channel channel);
 
   void completeVisit(Channel channel, URL url);
+
+  void onContentHandled();
 }
