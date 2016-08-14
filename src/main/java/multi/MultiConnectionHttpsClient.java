@@ -35,12 +35,13 @@ public class MultiConnectionHttpsClient {
   static long startTime, endTime;
   static Logger logger = LoggerFactory.getLogger(HttpsClient.class);
   static AtomicInteger counter = new AtomicInteger(1);
-  static int CHANNEL_POOL_SIZE = 20;
+  static int CHANNEL_POOL_SIZE = 10;
   protected int requestTimes = BaseTestConfig.REQUEST_TIMES;
   EventLoopGroup group = new NioEventLoopGroup();
   SocketAddress remoteAddress;
   SocketAddress localAddress;
   private ChannelPoolHandler channelPoolHandler;
+  private Map<URL, TraceInfo> traces;
 
   public static void main(String[] args) throws Exception {
     URI uri = new URI(BaseTestConfig.URI);
@@ -70,8 +71,7 @@ public class MultiConnectionHttpsClient {
       sendRequest(uri.toURL(), channelPool);
 
       // Wait for the server to close the connection.
-      Map<URL, TraceInfo> traces = ContextManager.getInstance().getTraces(60 * 3);
-      logger.info(String.valueOf(traces));
+      traces = ContextManager.getInstance().getTraces(60 * 3);
       endTime = System.nanoTime();
       long duration = endTime - startTime;
       logger.info(String.format("connection duration: %,dns (%d)", duration, duration));
@@ -104,6 +104,10 @@ public class MultiConnectionHttpsClient {
 
   public long getTimeElapsed() {
     return endTime - startTime;
+  }
+
+  public Map<URL, TraceInfo> getTraces() {
+    return traces;
   }
 
   public long getRequestSize() {

@@ -4,6 +4,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.annotations.SerializedName;
 import util.ShellUtil;
 
+import java.util.Map;
+
 /**
  * Created by Johnson on 16/7/19.
  */
@@ -48,6 +50,12 @@ public class MultiConnData {
   @SerializedName("http2_traces")
   private JsonElement http2Traces;
 
+  @SerializedName("https_channel_request_size")
+  private Map<String, Long> httpsChannelRequestSize;
+
+  @SerializedName("https_channel_response_size")
+  private Map<String, Long> httpsChannelResponseSize;
+
   @SerializedName("http2_transfer_time")
   private long http2TransferTime;
 
@@ -57,7 +65,8 @@ public class MultiConnData {
   public MultiConnData(String targetUrl, long httpsResponseSize, long httpsRequestSize, long http2ResponseSize,
                        long http2RequestSize, long httpsResponseSizeTcp, long httpsRequestSizeTcp,
                        long http2ResponseSizeTcp, long http2RequestSizeTcp, JsonElement httpsTraces,
-                       JsonElement http2Traces, long httpsTransferTime, long http2TransferTime) {
+                       JsonElement http2Traces, long httpsTransferTime, long http2TransferTime,
+                       Map<String, Long> httpsChannelRequestSize, Map<String, Long> httpsChannelResponseSize) {
     this.targetUrl = targetUrl;
     this.httpsResponseSize = httpsResponseSize;
     this.httpsRequestSize = httpsRequestSize;
@@ -71,6 +80,8 @@ public class MultiConnData {
     this.http2Traces = http2Traces;
     this.httpsTransferTime = httpsTransferTime;
     this.http2TransferTime = http2TransferTime;
+    this.httpsChannelRequestSize = httpsChannelRequestSize;
+    this.httpsChannelResponseSize = httpsChannelResponseSize;
 
     timeStamp = System.currentTimeMillis();
     hostName = new ShellUtil().exec("hostname");

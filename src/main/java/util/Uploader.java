@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Uploader util
@@ -58,6 +59,23 @@ public class Uploader {
       httpsTrafficSizeTcp.getOutput(), http2TrafficSizeTcp.getInput(), http2TrafficSizeTcp.getOutput(),
       new Gson().toJsonTree(httpsTraces), new Gson().toJsonTree(http2Traces), httpsTime, http2Time);
     URL url = new URL(BaseTestConfig.FULL_WEB_LOG_URL);
+    String response = post(url, new Gson().toJson(data));
+    logger.info(response);
+  }
+
+  public void uploadMultiConnRequest(String targetUrl, Map<URL, TraceInfo> httpsTraces,
+                                     List<TraceInfo> http2Traces, TrafficSize httpsTrafficSize,
+                                     TrafficSize http2TrafficSize, TrafficSize httpsTrafficSizeTcp,
+                                     TrafficSize http2TrafficSizeTcp, long httpsTime, long http2Time,
+                                     Map<String, Long> httpsChannelTcpRequestSize,
+                                     Map<String, Long> httpsChannelTcpResponseSize) throws IOException {
+    MultiConnData data = new MultiConnData(targetUrl, httpsTrafficSize.getInput(), httpsTrafficSize.getOutput(),
+      http2TrafficSize.getInput(), http2TrafficSize.getOutput(), httpsTrafficSizeTcp.getInput(),
+      httpsTrafficSizeTcp.getOutput(), http2TrafficSizeTcp.getInput(), http2TrafficSizeTcp.getOutput(),
+      new Gson().toJsonTree(httpsTraces), new Gson().toJsonTree(http2Traces), httpsTime, http2Time,
+      httpsChannelTcpRequestSize, httpsChannelTcpResponseSize);
+    URL url = new URL(BaseTestConfig.MULTI_CONN_LOG_URL);
+    System.out.println(new Gson().toJson(data));
     String response = post(url, new Gson().toJson(data));
     logger.info(response);
   }
