@@ -16,6 +16,7 @@ public class BaseTestConfig {
   public static final int HTTPS_PORT = 443;
 
   public static int REQUEST_TIMES = 20;
+  public static int CHANNEL_POOL_SIZE = 10;
   public static boolean LOG_TCPDUMP_OUTPUT = false;
     public static String URI = "https://pay.sohu.com/payment/index.action";
 //  public static String URI = "https://www.google.com";

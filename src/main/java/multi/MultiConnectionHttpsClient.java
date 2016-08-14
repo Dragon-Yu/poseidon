@@ -35,7 +35,6 @@ public class MultiConnectionHttpsClient {
   static long startTime, endTime;
   static Logger logger = LoggerFactory.getLogger(HttpsClient.class);
   static AtomicInteger counter = new AtomicInteger(1);
-  static int CHANNEL_POOL_SIZE = 10;
   protected int requestTimes = BaseTestConfig.REQUEST_TIMES;
   EventLoopGroup group = new NioEventLoopGroup();
   SocketAddress remoteAddress;
@@ -64,7 +63,7 @@ public class MultiConnectionHttpsClient {
         .channel(NioSocketChannel.class)
         .remoteAddress(host, port);
       channelPoolHandler = new MultiConnectionHandler(sslCtx);
-      ChannelPool channelPool = new FixedChannelPool(b, channelPoolHandler, CHANNEL_POOL_SIZE);
+      ChannelPool channelPool = new FixedChannelPool(b, channelPoolHandler, BaseTestConfig.CHANNEL_POOL_SIZE);
       ChannelPoolUtil.setChannelPool(channelPool);
 
       startTime = System.nanoTime();
