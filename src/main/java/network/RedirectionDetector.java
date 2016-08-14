@@ -27,8 +27,8 @@ public class RedirectionDetector {
     URL url = new URL("https://jigsaw.w3.org/HTTP/300/302.html");
     RedirectionDetector detector = new RedirectionDetector(url);
     if (detector.detect()) {
-      System.out.println(detector.getRedirectedUrl());
-      System.out.println(detector.getRedirectedUrl().toURI().toASCIIString());
+      logger.info(detector.getRedirectedUrl().toString());
+      logger.info(detector.getRedirectedUrl().toURI().toASCIIString());
     }
   }
 

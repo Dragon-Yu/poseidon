@@ -75,7 +75,6 @@ public class Uploader {
       new Gson().toJsonTree(httpsTraces), new Gson().toJsonTree(http2Traces), httpsTime, http2Time,
       httpsChannelTcpRequestSize, httpsChannelTcpResponseSize);
     URL url = new URL(BaseTestConfig.MULTI_CONN_LOG_URL);
-    System.out.println(new Gson().toJson(data));
     String response = post(url, new Gson().toJson(data));
     logger.info(response);
   }

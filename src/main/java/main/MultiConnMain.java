@@ -49,8 +49,6 @@ public class MultiConnMain {
       httpsClient.getLocalAddress().getAddress().getHostAddress(), httpsClient.getLocalAddress().getPort(),
       httpsClient.getRemoteAddress().getAddress().getHostAddress(), httpsClient.getRemoteAddress().getPort());
 
-    System.out.println();
-
     shellUtil = new ShellUtil();
     process = createTcpdumpProcess(localAddress);
     shellUtil.startReadingFromProcess(process);
