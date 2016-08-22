@@ -78,7 +78,7 @@ public class FullWebHttpsHandler extends HttpsHandler {
         continue;
       }
       if (!url.getHost().equals(((InetSocketAddress) ctx.channel().remoteAddress()).getHostName())) {
-        logger.warn("Ignore outer resource: " + url.toString());
+//        logger.warn("Ignore outer resource: " + url.toString());
         continue;
       }
       sendRequest(url, ctx);

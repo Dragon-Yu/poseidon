@@ -44,7 +44,7 @@ public class FullWebHttp2ResponseHandler extends Http2ResponseHandler {
         continue;
       }
       if (!url.getHost().equals(((InetSocketAddress) ctx.channel().remoteAddress()).getHostName())) {
-        logger.warn("Ignore outer resource: " + url.toString());
+//        logger.warn("Ignore outer resource: " + url.toString());
         continue;
       }
       traceController.visitUrl(url, ctx.channel());
