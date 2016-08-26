@@ -1,6 +1,7 @@
 package util;
 
 import entity.TrafficSize;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,10 @@ public class StringParseUtil {
         lineBuffer.add(line);
       }
     }
+    if (!lineBuffer.isEmpty()) {
+      parseLineBuffer(lineBuffer, inputPattern, outputPattern, inputSize, outputSize);
+      lineBuffer.clear();
+    }
     return new TrafficSize(inputSize.getValue(), outputSize.getValue());
   }
 
@@ -51,12 +56,11 @@ public class StringParseUtil {
     if (lines.isEmpty()) {
       return;
     }
-    if (lines.size() < 2) {
-      logger.warn("tcpdump output line num error: " + lines.get(0));
-    } else if (inputPattern.matcher(lines.get(1)).find()) {
-      inputSize.add(getIpPackageSize(lines.get(0)));
-    } else if (outputPattern.matcher(lines.get(1)).find()) {
-      outputSize.add(getIpPackageSize(lines.get(0)));
+    String data = StringUtils.join(lines, " ");
+    if (inputPattern.matcher(data).find()) {
+      inputSize.add(getIpPackageSize(data));
+    } else if (outputPattern.matcher(data).find()) {
+      outputSize.add(getIpPackageSize(data));
     }
   }
 
