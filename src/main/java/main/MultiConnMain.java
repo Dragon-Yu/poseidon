@@ -45,8 +45,9 @@ public class MultiConnMain {
     if (BaseTestConfig.LOG_TCPDUMP_OUTPUT) {
       logger.info(tcpdumpOutput);
     }
+    // In multi https connection scenario, there are many ports in use. So do not filter tcpdump output by port
     TrafficSize httpsTrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
-      httpsClient.getLocalAddress().getAddress().getHostAddress(), httpsClient.getLocalAddress().getPort(),
+      httpsClient.getLocalAddress().getAddress().getHostAddress(), 0,
       httpsClient.getRemoteAddress().getAddress().getHostAddress(), httpsClient.getRemoteAddress().getPort());
 
     shellUtil = new ShellUtil();

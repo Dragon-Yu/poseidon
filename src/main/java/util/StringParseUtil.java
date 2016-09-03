@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
  * Created by Johnson on 16/6/19.
  */
 public class StringParseUtil {
-  private static final Pattern lengthPattern = Pattern.compile(".*length (\\d+).*");
+  private static final Pattern lengthPattern = Pattern.compile(".*?length (\\d+)");
   private static Logger logger = LoggerFactory.getLogger(StringParseUtil.class);
 
   /**
@@ -28,7 +28,12 @@ public class StringParseUtil {
   public TrafficSize getTrafficSize(String str, String localIp, int localPort, String removeIp, int remotePort) {
     MutableLong inputSize = new MutableLong(0);
     MutableLong outputSize = new MutableLong(0);
-    String local = String.format("%s.%d", localIp, localPort);
+    String local;
+    if (localPort > 0) {
+      local = String.format("%s.%d", localIp, localPort);
+    } else {
+      local = String.format("%s.\\d+", localIp);
+    }
     String remote = String.format("%s.%d", removeIp, remotePort);
     Pattern inputPattern = Pattern.compile(String.format("%s > %s", remote, local));
     Pattern outputPattern = Pattern.compile(String.format("%s > %s", local, remote));
