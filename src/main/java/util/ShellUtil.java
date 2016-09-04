@@ -106,7 +106,7 @@ public class ShellUtil {
     String line;
     while ((line = reader.readLine()) != null) {
       logger.warn(line);
-      if (Thread.currentThread().isInterrupted()) {
+      if (Thread.currentThread().isInterrupted() && !reader.ready()) {
         throw new InterruptedException();
       }
     }
@@ -117,7 +117,7 @@ public class ShellUtil {
     BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
     String line;
     while ((line = reader.readLine()) != null) {
-      if (Thread.currentThread().isInterrupted()) {
+      if (Thread.currentThread().isInterrupted() && !reader.ready()) {
         throw new InterruptedException();
       }
       stringBuilder.append(line + "\n");
