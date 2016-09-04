@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 
 /**
  * Easy way to execute shell commands
@@ -15,7 +16,21 @@ import java.io.InputStreamReader;
 public class ShellUtil {
   private static Logger logger = LoggerFactory.getLogger(ShellUtil.class);
   private Thread processReadingThread;
+  private Thread processWarningLoggingThread;
   private StringBuilder processOutput;
+
+  public static long getPid(Process p) {
+    long pid = -1;
+    try {
+      Field f = p.getClass().getDeclaredField("pid");
+      f.setAccessible(true);
+      pid = f.getLong(p);
+      f.setAccessible(false);
+    } catch (Exception e) {
+      logger.error(e.getMessage(), e);
+    }
+    return pid;
+  }
 
   public String exec(String command) {
     StringBuilder stringBuilder = new StringBuilder();
@@ -44,6 +59,23 @@ public class ShellUtil {
         }
       }
     };
+    processReadingThread.setName("process_reading_thread");
+    processWarningLoggingThread = new Thread() {
+      @Override
+      public void run() {
+        try {
+          logWarningMessage(process);
+        } catch (InterruptedException e) {
+          //Do nothing if it is interrupted
+        } catch (IOException e) {
+          if (!e.getMessage().equalsIgnoreCase("Stream Closed")) {
+            logger.error(e.getMessage(), e);
+          }
+        }
+      }
+    };
+    processWarningLoggingThread.setName("process_warning_logging_thread");
+    processWarningLoggingThread.start();
     processReadingThread.start();
   }
 
@@ -51,7 +83,7 @@ public class ShellUtil {
     try {
       Thread.sleep(wait);
       logger.info("kill process");
-      process.destroy();
+      Runtime.getRuntime().exec(String.format("sudo pkill -SIGINT -P %d", getPid(process)));
       if (!StringUtils.isEmpty(processName)) {
         killProcess(processName);
       }
@@ -61,11 +93,23 @@ public class ShellUtil {
     }
     logger.info("interrupt thread");
     processReadingThread.interrupt();
+    processWarningLoggingThread.interrupt();
     return processOutput.toString().trim();
   }
 
   private void killProcess(String process) throws IOException {
     Runtime.getRuntime().exec(String.format("sudo kill -9 `ps -ef|grep %s| awk '{print $2}'`", process));
+  }
+
+  private void logWarningMessage(Process process) throws IOException, InterruptedException {
+    BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+    String line;
+    while ((line = reader.readLine()) != null) {
+      logger.warn(line);
+      if (Thread.currentThread().isInterrupted()) {
+        throw new InterruptedException();
+      }
+    }
   }
 
   private void readIntoStringBuilder(Process process, StringBuilder stringBuilder)

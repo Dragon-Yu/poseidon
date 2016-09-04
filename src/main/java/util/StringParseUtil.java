@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
  * Created by Johnson on 16/6/19.
  */
 public class StringParseUtil {
-  private static final Pattern lengthPattern = Pattern.compile(".*?length (\\d+)");
+  private static final Pattern lengthPattern = Pattern.compile(".*?length (\\d+).*");
   private static Logger logger = LoggerFactory.getLogger(StringParseUtil.class);
 
   /**

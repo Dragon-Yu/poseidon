@@ -21,9 +21,11 @@ public class BaseTestConfig {
   private static final String ATTR_HOSTS_TO_CHECK = "hosts_to_check";
   private static final String ATTR_TCPDUMP_CMD = "tcpdump_cmd";
   private static final String ATTR_LOG_TCPDUMP_OUTPUT = "log_tcpdump_output";
+  private static final String ATTR_IGNORE_OUTTER_LINK = "ignore_outter_link";
   public static int REQUEST_TIMES = 20;
   public static int CHANNEL_POOL_SIZE = 20;
   public static boolean LOG_TCPDUMP_OUTPUT = false;
+  public static boolean IGNORE_OUTTER_LINK = true;
   public static String URI = "https://pay.sohu.com/payment/index.action";
   //  public static String URI = "https://www.google.com";
   public static String API_REQUEST_LOG_URL = "https://prometheus-1151.appspot.com/log/api_request";
