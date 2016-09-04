@@ -44,6 +44,18 @@ public class MultiConnData {
   @SerializedName("http2_request_size_tcp")
   private long http2RequestSizeTcp;
 
+  @SerializedName("https_response_size_tcp_tcpdump")
+  private long httpsResponseSizeTcpTcpdump;
+
+  @SerializedName("https_request_size_tcp_tcpdump")
+  private long httpsRequestSizeTcpTcpdump;
+
+  @SerializedName("http2_response_size_tcp_tcpdump")
+  private long http2ResponseSizeTcpTcpdump;
+
+  @SerializedName("http2_request_size_tcp_tcpdump")
+  private long http2RequestSizeTcpTcpdump;
+
   @SerializedName("https_traces")
   private JsonElement httpsTraces;
 
@@ -62,11 +74,20 @@ public class MultiConnData {
   @SerializedName("https_transfer_time")
   private long httpsTransferTime;
 
+  @SerializedName("https_tcpdump_packets_drop")
+  private int httpsTcpdumpPacketsDrop;
+
+  @SerializedName("http2_tcpdump_packets_drop")
+  private int http2TcpdumpPacketsDrop;
+
   public MultiConnData(String targetUrl, long httpsResponseSize, long httpsRequestSize, long http2ResponseSize,
                        long http2RequestSize, long httpsResponseSizeTcp, long httpsRequestSizeTcp,
                        long http2ResponseSizeTcp, long http2RequestSizeTcp, JsonElement httpsTraces,
                        JsonElement http2Traces, long httpsTransferTime, long http2TransferTime,
-                       Map<String, Long> httpsChannelRequestSize, Map<String, Long> httpsChannelResponseSize) {
+                       Map<String, Long> httpsChannelRequestSize, Map<String, Long> httpsChannelResponseSize,
+                       long httpsRequestSizeTcpTcpdump, long httpsResponseSizeTcpTcpdump,
+                       long http2RequestSizeTcpTcpdump, long http2ResponseSizeTcpTcpdump,
+                       int httpsTcpdumpPacketsDrop, int http2TcpdumpPacketsDrop) {
     this.targetUrl = targetUrl;
     this.httpsResponseSize = httpsResponseSize;
     this.httpsRequestSize = httpsRequestSize;
@@ -82,6 +103,12 @@ public class MultiConnData {
     this.http2TransferTime = http2TransferTime;
     this.httpsChannelRequestSize = httpsChannelRequestSize;
     this.httpsChannelResponseSize = httpsChannelResponseSize;
+    this.httpsRequestSizeTcpTcpdump = httpsRequestSizeTcpTcpdump;
+    this.httpsResponseSizeTcpTcpdump = httpsResponseSizeTcpTcpdump;
+    this.http2RequestSizeTcpTcpdump = http2RequestSizeTcpTcpdump;
+    this.http2ResponseSizeTcpTcpdump = http2ResponseSizeTcpTcpdump;
+    this.httpsTcpdumpPacketsDrop = httpsTcpdumpPacketsDrop;
+    this.http2TcpdumpPacketsDrop = http2TcpdumpPacketsDrop;
 
     timeStamp = System.currentTimeMillis();
     hostName = new ShellUtil().exec("hostname");

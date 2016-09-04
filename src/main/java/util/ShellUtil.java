@@ -7,6 +7,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Easy way to execute shell commands
@@ -14,9 +18,15 @@ import java.lang.reflect.Field;
  */
 public class ShellUtil {
   private static Logger logger = LoggerFactory.getLogger(ShellUtil.class);
+  Pattern pattern = Pattern.compile(".*(\\d+) packets dropped by kernel");
+  private static Map<Process, Integer> tcpdumpPacketDropInfo = new ConcurrentHashMap<>();
   private Thread processReadingThread;
   private Thread processWarningLoggingThread;
   private StringBuilder processOutput;
+
+  public static int getTcpdumpPacketDrop(Process process) {
+    return tcpdumpPacketDropInfo.getOrDefault(process, -1);
+  }
 
   public static long getPid(Process p) {
     long pid = -1;
@@ -97,6 +107,10 @@ public class ShellUtil {
     String line;
     while ((line = reader.readLine()) != null) {
       logger.warn(line);
+      Matcher matcher = pattern.matcher(line);
+      if (matcher.matches()) {
+        tcpdumpPacketDropInfo.put(process, Integer.valueOf(matcher.group(1)));
+      }
       if (Thread.currentThread().isInterrupted() && !reader.ready()) {
         throw new InterruptedException();
       }

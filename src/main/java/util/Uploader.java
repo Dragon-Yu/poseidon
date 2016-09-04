@@ -38,7 +38,8 @@ public class Uploader {
     logger.info(response);
   }
 
-  public void uploadTrafficSizeComparison(String targetUrl, TrafficSize httpsTrafficSize, TrafficSize http2TrafficSize,
+  public void uploadTrafficSizeComparison(String targetUrl, TcpdumpTrafficSize httpsTrafficSize,
+                                          TcpdumpTrafficSize http2TrafficSize,
                                           TrafficSize httpsTrafficSizeTcp, TrafficSize http2TrafficSizeTcp)
     throws IOException {
     TrafficSizeData data = new TrafficSizeData(targetUrl, httpsTrafficSize.getInput(), httpsTrafficSize.getOutput(),
@@ -51,8 +52,8 @@ public class Uploader {
   }
 
   public void uploadFullWebRequest(String targetUrl, List<TraceInfo> httpsTraces,
-                                   List<TraceInfo> http2Traces, TrafficSize httpsTrafficSize,
-                                   TrafficSize http2TrafficSize, TrafficSize httpsTrafficSizeTcp,
+                                   List<TraceInfo> http2Traces, TcpdumpTrafficSize httpsTrafficSize,
+                                   TcpdumpTrafficSize http2TrafficSize, TrafficSize httpsTrafficSizeTcp,
                                    TrafficSize http2TrafficSizeTcp, long httpsTime, long http2Time) throws IOException {
     FullWebData data = new FullWebData(targetUrl, httpsTrafficSize.getInput(), httpsTrafficSize.getOutput(),
       http2TrafficSize.getInput(), http2TrafficSize.getOutput(), httpsTrafficSizeTcp.getInput(),
@@ -64,16 +65,19 @@ public class Uploader {
   }
 
   public void uploadMultiConnRequest(String targetUrl, Map<URL, TraceInfo> httpsTraces,
-                                     List<TraceInfo> http2Traces, TrafficSize httpsTrafficSize,
-                                     TrafficSize http2TrafficSize, TrafficSize httpsTrafficSizeTcp,
+                                     List<TraceInfo> http2Traces, TcpdumpTrafficSize httpsTrafficSize,
+                                     TcpdumpTrafficSize http2TrafficSize, TrafficSize httpsTrafficSizeTcp,
                                      TrafficSize http2TrafficSizeTcp, long httpsTime, long http2Time,
                                      Map<String, Long> httpsChannelTcpRequestSize,
-                                     Map<String, Long> httpsChannelTcpResponseSize) throws IOException {
+                                     Map<String, Long> httpsChannelTcpResponseSize, int httpsTcpdumpPacketsDrop,
+                                     int http2TcpdumpPacketsDrop) throws IOException {
     MultiConnData data = new MultiConnData(targetUrl, httpsTrafficSize.getInput(), httpsTrafficSize.getOutput(),
       http2TrafficSize.getInput(), http2TrafficSize.getOutput(), httpsTrafficSizeTcp.getInput(),
       httpsTrafficSizeTcp.getOutput(), http2TrafficSizeTcp.getInput(), http2TrafficSizeTcp.getOutput(),
       new Gson().toJsonTree(httpsTraces), new Gson().toJsonTree(http2Traces), httpsTime, http2Time,
-      httpsChannelTcpRequestSize, httpsChannelTcpResponseSize);
+      httpsChannelTcpRequestSize, httpsChannelTcpResponseSize, httpsTrafficSize.getTcpOutput(),
+      httpsTrafficSize.getTcpInput(), http2TrafficSize.getTcpOutput(), http2TrafficSize.getTcpInput(),
+      httpsTcpdumpPacketsDrop, http2TcpdumpPacketsDrop);
     URL url = new URL(BaseTestConfig.MULTI_CONN_LOG_URL);
     String response = post(url, new Gson().toJson(data));
     logger.info(response);

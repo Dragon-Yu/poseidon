@@ -1,6 +1,7 @@
 package main;
 
 import config.BaseTestConfig;
+import entity.TcpdumpTrafficSize;
 import entity.TrafficSize;
 import fullweb.FullWebHttp2Client;
 import io.netty.channel.Channel;
@@ -35,9 +36,13 @@ public class MultiConnMain {
     logger.info("uri redirected to: " + uri);
     String localAddress = Inet4Address.getLocalHost().getHostAddress();
 
+    int httpsTcpdumpPacketsDrop;
+    int http2TcpdumpPacketsDrop;
+
     ShellUtil shellUtil = new ShellUtil();
     Process process = createTcpdumpProcess(localAddress);
     shellUtil.startReadingFromProcess(process);
+    Thread.sleep(PROCESS_WAITING_TIME);
     httpsClient.run(uri);
     TrafficSize httpsTrafficSizeTcp = new TrafficSize(httpsClient.getResponseSize(), httpsClient.getRequestSize());
     String tcpdumpOutput = shellUtil.getProcessOutputThenInterrupt(PROCESS_WAITING_TIME, process, "tcpdump");
@@ -46,13 +51,15 @@ public class MultiConnMain {
       logger.info(tcpdumpOutput);
     }
     // In multi https connection scenario, there are many ports in use. So do not filter tcpdump output by port
-    TrafficSize httpsTrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
+    TcpdumpTrafficSize httpsTrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
       httpsClient.getLocalAddress().getAddress().getHostAddress(), 0,
       httpsClient.getRemoteAddress().getAddress().getHostAddress(), httpsClient.getRemoteAddress().getPort());
+    httpsTcpdumpPacketsDrop = ShellUtil.getTcpdumpPacketDrop(process);
 
     shellUtil = new ShellUtil();
     process = createTcpdumpProcess(localAddress);
     shellUtil.startReadingFromProcess(process);
+    Thread.sleep(PROCESS_WAITING_TIME);
     http2Client.setRequestTimes(1);
     http2Client.run(uri);
     TrafficSize http2TrafficSizeTcp = new TrafficSize(http2Client.getResponseSize(), http2Client.getRequestSize());
@@ -61,9 +68,10 @@ public class MultiConnMain {
     if (BaseTestConfig.LOG_TCPDUMP_OUTPUT) {
       logger.info(tcpdumpOutput);
     }
-    TrafficSize http2TrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
+    TcpdumpTrafficSize http2TrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
       http2Client.getLocalAddress().getAddress().getHostAddress(), http2Client.getLocalAddress().getPort(),
       http2Client.getRemoteAddress().getAddress().getHostAddress(), http2Client.getRemoteAddress().getPort());
+    http2TcpdumpPacketsDrop = ShellUtil.getTcpdumpPacketDrop(process);
 
     logger.info(String.format("Https traffic size(IP): %s", httpsTrafficSize));
     logger.info(String.format("Https traffic size(TCP), input: %d, output: %d",
@@ -84,6 +92,7 @@ public class MultiConnMain {
     }
     uploader.uploadMultiConnRequest(uri.toASCIIString(), httpsClient.getTraces(), http2Client.getTraces(),
       httpsTrafficSize, http2TrafficSize, httpsTrafficSizeTcp, http2TrafficSizeTcp, httpsClient.getTimeElapsed(),
-      http2Client.getTimeElapsed(), channelRequestSize, channelResponseSize);
+      http2Client.getTimeElapsed(), channelRequestSize, channelResponseSize, httpsTcpdumpPacketsDrop,
+      http2TcpdumpPacketsDrop);
   }
 }

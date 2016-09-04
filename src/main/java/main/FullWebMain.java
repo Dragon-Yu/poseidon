@@ -1,6 +1,7 @@
 package main;
 
 import config.BaseTestConfig;
+import entity.TcpdumpTrafficSize;
 import entity.TrafficSize;
 import fullweb.FullWebHttp2Client;
 import fullweb.FullWebHttpsClient;
@@ -41,7 +42,7 @@ public class FullWebMain {
     if (BaseTestConfig.LOG_TCPDUMP_OUTPUT) {
       logger.info(tcpdumpOutput);
     }
-    TrafficSize httpsTrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
+    TcpdumpTrafficSize httpsTrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
       httpsClient.getLocalAddress().getAddress().getHostAddress(), httpsClient.getLocalAddress().getPort(),
       httpsClient.getRemoteAddress().getAddress().getHostAddress(), httpsClient.getRemoteAddress().getPort());
 
@@ -57,7 +58,7 @@ public class FullWebMain {
     if (BaseTestConfig.LOG_TCPDUMP_OUTPUT) {
       logger.info(tcpdumpOutput);
     }
-    TrafficSize http2TrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
+    TcpdumpTrafficSize http2TrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
       http2Client.getLocalAddress().getAddress().getHostAddress(), http2Client.getLocalAddress().getPort(),
       http2Client.getRemoteAddress().getAddress().getHostAddress(), http2Client.getRemoteAddress().getPort());
 

@@ -1,6 +1,7 @@
 package main;
 
 import config.BaseTestConfig;
+import entity.TcpdumpTrafficSize;
 import entity.TrafficSize;
 import http2.client.Http2Client;
 import https.client.HttpsClient;
@@ -40,7 +41,7 @@ public class TrafficSizeMain {
     if (BaseTestConfig.LOG_TCPDUMP_OUTPUT) {
       logger.info(tcpdumpOutput);
     }
-    TrafficSize httpsTrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
+    TcpdumpTrafficSize httpsTrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
       httpsClient.getLocalAddress().getAddress().getHostAddress(), httpsClient.getLocalAddress().getPort(),
       httpsClient.getRemoteAddress().getAddress().getHostAddress(), httpsClient.getRemoteAddress().getPort());
     TrafficSize httpsTrafficSizeTcp = new TrafficSize(httpsClient.getResponseSize(), httpsClient.getRequestSize());
@@ -54,7 +55,7 @@ public class TrafficSizeMain {
     if (BaseTestConfig.LOG_TCPDUMP_OUTPUT) {
       logger.info(tcpdumpOutput);
     }
-    TrafficSize http2TrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
+    TcpdumpTrafficSize http2TrafficSize = new StringParseUtil().getTrafficSize(tcpdumpOutput,
       http2Client.getLocalAddress().getAddress().getHostAddress(), http2Client.getLocalAddress().getPort(),
       http2Client.getRemoteAddress().getAddress().getHostAddress(), http2Client.getRemoteAddress().getPort());
     TrafficSize http2TrafficSizeTcp = new TrafficSize(http2Client.getResponseSize(), http2Client.getRequestSize());
