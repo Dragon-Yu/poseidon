@@ -34,7 +34,7 @@ public class BaseTestConfig {
   public static String FULL_WEB_LOG_URL = "https://prometheus-1151.appspot.com/log/full_web";
   public static String MULTI_CONN_LOG_URL = "https://prometheus-1151.appspot.com/log/multi_conn";
   public static String HOSTS_TO_CHECK = "[\"https://baidu.com\", \"https://google.com\"]";
-  public static String TCPDUMP_CMD = "sudo tcpdump -B 10240 -lnnv -i any tcp";
+  public static String TCPDUMP_CMD = "sudo tcpdump -B 10240 -lnnv tcp";
 
   static {
     for (Field field : BaseTestConfig.class.getDeclaredFields()) {

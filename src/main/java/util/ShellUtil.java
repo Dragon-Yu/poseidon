@@ -1,6 +1,5 @@
 package util;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,23 +81,15 @@ public class ShellUtil {
   public String getProcessOutputThenInterrupt(int wait, Process process, String processName) {
     try {
       Thread.sleep(wait);
-      logger.info("kill process");
-      Runtime.getRuntime().exec(String.format("sudo pkill -SIGINT -P %d", getPid(process)));
-      if (!StringUtils.isEmpty(processName)) {
-        killProcess(processName);
-      }
+      Runtime.getRuntime().exec(String.format("sudo pkill -SIGINT %s", processName));
       Thread.sleep(3000);
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
     }
-    logger.info("interrupt thread");
+    logger.info("interrupt threads");
     processReadingThread.interrupt();
     processWarningLoggingThread.interrupt();
     return processOutput.toString().trim();
-  }
-
-  private void killProcess(String process) throws IOException {
-    Runtime.getRuntime().exec(String.format("sudo kill -9 `ps -ef|grep %s| awk '{print $2}'`", process));
   }
 
   private void logWarningMessage(Process process) throws IOException, InterruptedException {
