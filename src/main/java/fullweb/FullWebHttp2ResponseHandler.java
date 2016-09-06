@@ -11,6 +11,7 @@ import util.RequestUtil;
 
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.Set;
 
 /**
@@ -35,7 +36,11 @@ public class FullWebHttp2ResponseHandler extends Http2ResponseHandler {
     if (!contentType.getMimeType().equals(ContentType.TEXT_HTML.getMimeType())) {
       return;
     }
-    String html = new String(content, contentType.getCharset());
+    Charset charset = contentType.getCharset();
+    if (charset == null) {
+      charset = Charset.defaultCharset();
+    }
+    String html = new String(content, charset);
     HtmlParser parser = new HtmlParser();
     Set<URL> urlSet = parser.getLinks(html,
       "https://" + ((InetSocketAddress) ctx.channel().remoteAddress()).getHostName());
