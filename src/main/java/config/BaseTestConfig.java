@@ -25,7 +25,7 @@ public class BaseTestConfig {
   public static int REQUEST_TIMES = 20;
   public static int CHANNEL_POOL_SIZE = 20;
   public static boolean LOG_TCPDUMP_OUTPUT = false;
-  public static boolean IGNORE_OUTTER_LINK = true;
+  public static boolean IGNORE_OUTER_LINK = false;
   public static String URI = "https://pay.sohu.com/payment/index.action";
   //  public static String URI = "https://www.google.com";
   public static String API_REQUEST_LOG_URL = "https://prometheus-1151.appspot.com/log/api_request";
@@ -33,6 +33,7 @@ public class BaseTestConfig {
   public static String TRAFFIC_SIZE_LOG_URL = "https://prometheus-1151.appspot.com/log/traffic_size";
   public static String FULL_WEB_LOG_URL = "https://prometheus-1151.appspot.com/log/full_web";
   public static String MULTI_CONN_LOG_URL = "https://prometheus-1151.appspot.com/log/multi_conn";
+  public static String POSEIDON_LOG_URL = "https://prometheus-1151.appspot.com/log/poseidon";
   public static String HOSTS_TO_CHECK = "[\"https://baidu.com\", \"https://google.com\"]";
   public static String TCPDUMP_CMD = "sudo tcpdump -B 10240 -lnnv tcp";
 

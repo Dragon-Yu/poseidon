@@ -34,7 +34,7 @@ public class HttpsHandler extends SimpleChannelInboundHandler<HttpObject> {
   public void channelRead0(ChannelHandlerContext ctx, HttpObject msg) {
     if (msg instanceof HttpContent) {
       HttpContent content = (HttpContent) msg;
-      logger.info(String.valueOf(content.content().toString(CharsetUtil.UTF_8).length()));
+      logger.info(String.valueOf(content.content().toString(CharsetUtil.UTF_8)));
       if (content instanceof LastHttpContent) {
         HttpsClient.counter.getAndAdd(1);
       }

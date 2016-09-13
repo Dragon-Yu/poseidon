@@ -1,5 +1,6 @@
 package fullweb;
 
+import config.BaseTestConfig;
 import https.client.HttpsHandler;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -85,7 +86,11 @@ public class FullWebHttpsHandler extends HttpsHandler {
       }
       if (!url.getHost().equals(((InetSocketAddress) ctx.channel().remoteAddress()).getHostName())) {
 //        logger.warn("Ignore outer resource: " + url.toString());
-        continue;
+        if (BaseTestConfig.IGNORE_OUTER_LINK) {
+          continue;
+        } else {
+          continue;
+        }
       }
       sendRequest(url, ctx);
     }

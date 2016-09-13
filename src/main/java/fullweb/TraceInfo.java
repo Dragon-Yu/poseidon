@@ -22,6 +22,7 @@ public class TraceInfo {
   private URL url;
 
   public TraceInfo(URL url) {
+    this.requestTimeStamp = System.nanoTime();
     this.url = url;
   }
 
@@ -41,9 +42,19 @@ public class TraceInfo {
     timeElapsed = responseTimeStamp - requestTimeStamp;
   }
 
+  public void setChannelId(String channelId) {
+    this.channelId = channelId;
+  }
+
   public void setResponseTimeStamp(long responseTimeStamp) {
     this.responseTimeStamp = responseTimeStamp;
     timeElapsed = responseTimeStamp - requestTimeStamp;
+  }
+
+  public void finish(String channelId, long responseTimeStamp) {
+    this.channelId = channelId;
+    this.responseTimeStamp = responseTimeStamp;
+    this.timeElapsed = responseTimeStamp - requestTimeStamp;
   }
 
   @Override

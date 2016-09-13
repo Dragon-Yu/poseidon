@@ -1,5 +1,6 @@
 package fullweb;
 
+import config.BaseTestConfig;
 import http2.client.Http2ResponseHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -50,7 +51,11 @@ public class FullWebHttp2ResponseHandler extends Http2ResponseHandler {
       }
       if (!url.getHost().equals(((InetSocketAddress) ctx.channel().remoteAddress()).getHostName())) {
 //        logger.warn("Ignore outer resource: " + url.toString());
-        continue;
+        if (BaseTestConfig.IGNORE_OUTER_LINK) {
+          continue;
+        } else {
+          continue;
+        }
       }
       traceController.visitUrl(url, ctx.channel());
       FullHttpRequest request = RequestUtil.generateHttp2Request(url);

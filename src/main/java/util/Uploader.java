@@ -83,6 +83,12 @@ public class Uploader {
     logger.info(response);
   }
 
+  public void uploadPoseidonRequest(PoseidonData poseidonData) throws IOException {
+    URL url = new URL(BaseTestConfig.POSEIDON_LOG_URL);
+    String response = post(url, new Gson().toJson(poseidonData));
+    logger.info(response);
+  }
+
   private String post(URL url, String postData) throws IOException {
     HttpURLConnection connection = (HttpURLConnection) url.openConnection();
     connection.setConnectTimeout(30000);
