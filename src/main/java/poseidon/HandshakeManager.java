@@ -57,7 +57,6 @@ public class HandshakeManager {
   }
 
   public void completeHandshake(Channel channel) {
-    logger.warn(channel.toString());
     channel.attr(HANDSHAKE_ATTRIBUTE_KEY).get().setSuccess();
   }
 }

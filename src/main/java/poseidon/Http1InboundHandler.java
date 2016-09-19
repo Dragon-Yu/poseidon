@@ -44,7 +44,7 @@ public class Http1InboundHandler extends SimpleChannelInboundHandler<HttpObject>
   }
 
   private void handleContent(byte[] content, ChannelHandlerContext ctx, ContentType contentType, Context context) {
-    logger.info("content size: " + content.length + " for url: " + ctx.channel().attr(ChannelManager.TARGET_URL_KEY));
+//    logger.info("content size: " + content.length + " for url: " + ctx.channel().attr(ChannelManager.TARGET_URL_KEY));
     if (!contentType.getMimeType().equals(ContentType.TEXT_HTML.getMimeType())) {
       return;
     }
@@ -64,7 +64,7 @@ public class Http1InboundHandler extends SimpleChannelInboundHandler<HttpObject>
           logger.error(e.getMessage(), e);
         }
       } else {
-        logger.info("ignore url: " + url);
+//        logger.info("ignore url: " + url);
       }
     }
   }

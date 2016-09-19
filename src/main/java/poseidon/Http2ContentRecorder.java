@@ -38,7 +38,7 @@ public class Http2ContentRecorder {
   }
 
   public void logVisitUrl(URL url, int streamId) {
-    logger.info("visit url: " + url + " on stream: " + streamId);
+//    logger.info("visit url: " + url + " on stream: " + streamId);
     urlOnTheAir.put(streamId, url);
     traceInfoMap.put(url, new TraceInfo(url));
   }

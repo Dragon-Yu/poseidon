@@ -45,9 +45,7 @@ public class ChannelPoolInitializer extends AbstractChannelPoolHandler {
     pipeline.addLast(new ApplicationProtocolNegotiationHandler(ApplicationProtocolNames.HTTP_1_1) {
       @Override
       protected void configurePipeline(ChannelHandlerContext ctx, String protocol) throws Exception {
-        logger.info(Thread.currentThread().toString());
-        logger.info(ch.attr(ChannelManager.CONTEXT_ATTRIBUTE_KEY).get().toString());
-        logger.info("protocol: " + protocol);
+//        logger.info("protocol: " + protocol);
         if (ApplicationProtocolNames.HTTP_2.equals(protocol)) {
           pipeline.addLast(createHttpToHttp2ConnectionHandler());
           pipeline.addLast(new Http2SettingsHandler());
