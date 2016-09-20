@@ -15,6 +15,7 @@ import java.net.URL;
  * Created by Johnson on 16/9/7.
  */
 public class PoseidonMain {
+  private static boolean http2Unsupported = false;
   private static Logger logger = LoggerFactory.getLogger(MultiConnMain.class);
 
   public static void main(String[] args) throws Exception {
@@ -24,7 +25,8 @@ public class PoseidonMain {
 
     ExperimentData http1ExperimentData = http1(uri.toURL());
     ExperimentData http2ExperimentData = http2(uri.toURL());
-    PoseidonData poseidonData = new PoseidonData(http1ExperimentData, http2ExperimentData, new ConfigData());
+    PoseidonData poseidonData =
+      new PoseidonData(http1ExperimentData, http2ExperimentData, new ConfigData(), http2Unsupported);
     new Uploader().uploadPoseidonRequest(poseidonData);
   }
 
@@ -42,6 +44,10 @@ public class PoseidonMain {
     TcpTrafficSize tcpTrafficSize = TcpTrafficRecorder.getInstance(context).getTcpTrafficSize();
     ExperimentData experimentData = new ExperimentData(Http2ContentRecorder.getInstance(context).getTraceInfoList(),
       tcpTrafficSize, tcpdumpInfo, t4 - t3);
+    http2Unsupported = context.isHttp2Unsupported();
+    if (!context.getOtherProtocols().isEmpty()) {
+      logger.error(context.getOtherProtocols().toString());
+    }
     return experimentData;
   }
 

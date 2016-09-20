@@ -56,6 +56,7 @@ public class ChannelPoolInitializer extends AbstractChannelPoolHandler {
           pipeline.addLast(new Http2InboundHandler());
         } else if (ApplicationProtocolNames.HTTP_1_1.equals(protocol)) {
           if (!context.httpsOnly) {
+            context.setHttp2Unsupported(true);
             Http1ContentRecorder.getInstance(context)
               .logVisitUrl(ctx.channel().attr(ChannelManager.TARGET_URL_KEY).get());
           }
@@ -64,12 +65,14 @@ public class ChannelPoolInitializer extends AbstractChannelPoolHandler {
           pipeline.addLast(new Http1InboundHandler());
           HandshakeManager.getInstance(context).completeHandshake(ctx.channel());
         } else {
+          context.addOtherProtocol(protocol);
           logger.error("unknown protocol " + protocol + " for channel: " + ctx.channel().remoteAddress().toString());
           logger.warn("handle unknown protocol as http/1.1");
 //          HandshakeManager.getInstance(context).failHandshake(ch,
 //            new IllegalStateException("unknown protocol: " + protocol));
           ctx.channel().attr(PROTOCOL_ATTRIBUTE_KEY).set(ApplicationProtocolNames.HTTP_1_1);
           if (!context.httpsOnly) {
+            context.setHttp2Unsupported(true);
             Http1ContentRecorder.getInstance(context)
               .logVisitUrl(ctx.channel().attr(ChannelManager.TARGET_URL_KEY).get());
           }
