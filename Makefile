@@ -3,4 +3,4 @@ all:
 	./script/deploy.sh
 
 run: all
-	sudo ./planet_lab/run_traffic_size.sh
+	sudo ./planet_lab/run_poseidon.sh

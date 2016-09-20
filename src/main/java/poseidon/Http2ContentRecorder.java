@@ -44,6 +44,7 @@ public class Http2ContentRecorder {
   }
 
   public void logCompleteUrl(int streamId, Channel channel) {
+//    logger.info("complete stream: " + streamId);
     URL url = urlOnTheAir.get(streamId);
     urlOnTheAir.remove(streamId);
     traceInfoMap.get(url).finish(channel.id().asShortText(), System.nanoTime());
@@ -69,6 +70,7 @@ public class Http2ContentRecorder {
 
   public void updateCompleteStatus() {
     if (urlOnTheAir.isEmpty()) {
+      logger.info("wait http2 to complete");
       completeFuture.set(null);
     }
   }

@@ -85,6 +85,7 @@ public class Http1ContentRecorder {
   }
 
   public void logCompleteUrl(Channel channel) {
+//    logger.info("complete channel: " + channel);
     URL url = channel.attr(ChannelManager.TARGET_URL_KEY).get();
     urlOnTheAir.remove(url);
     traceInfoMap.get(url).finish(channel.id().asShortText(), System.nanoTime());
@@ -95,7 +96,8 @@ public class Http1ContentRecorder {
   }
 
   public void updateCompleteStatus() {
-    if (urlOnTheAir.isEmpty()) {
+//    logger.info("update complete status");
+    if (urlOnTheAir.isEmpty() && !HandshakeManager.getInstance(context).hasHandshakeInProgress()) {
       completionFuture.set(null);
     }
   }
@@ -103,6 +105,7 @@ public class Http1ContentRecorder {
   public void waitCompletion() throws InterruptedException, ExecutionException {
     // if there is no http/1.x traffic, just return
     if (!traceInfoMap.isEmpty()) {
+      logger.info("wait http1 to complete");
       completionFuture.get();
     }
   }

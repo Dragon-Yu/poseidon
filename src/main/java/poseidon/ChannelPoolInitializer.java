@@ -9,6 +9,7 @@ import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.codec.http2.*;
 import io.netty.handler.ssl.ApplicationProtocolNames;
 import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler;
+import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.SslUtil;
@@ -18,6 +19,8 @@ import util.SslUtil;
  */
 public class ChannelPoolInitializer extends AbstractChannelPoolHandler {
   private static final Logger logger = LoggerFactory.getLogger(ChannelPoolInitializer.class);
+  private static final String PROTOCOL_ATTR = "protocol";
+  public static final AttributeKey<String> PROTOCOL_ATTRIBUTE_KEY = AttributeKey.newInstance(PROTOCOL_ATTR);
   final Context context;
 
   public ChannelPoolInitializer(Context context) {
@@ -46,19 +49,34 @@ public class ChannelPoolInitializer extends AbstractChannelPoolHandler {
       @Override
       protected void configurePipeline(ChannelHandlerContext ctx, String protocol) throws Exception {
 //        logger.info("protocol: " + protocol);
+        ctx.channel().attr(PROTOCOL_ATTRIBUTE_KEY).set(protocol);
         if (ApplicationProtocolNames.HTTP_2.equals(protocol)) {
           pipeline.addLast(createHttpToHttp2ConnectionHandler());
           pipeline.addLast(new Http2SettingsHandler());
           pipeline.addLast(new Http2InboundHandler());
         } else if (ApplicationProtocolNames.HTTP_1_1.equals(protocol)) {
+          if (!context.httpsOnly) {
+            Http1ContentRecorder.getInstance(context)
+              .logVisitUrl(ctx.channel().attr(ChannelManager.TARGET_URL_KEY).get());
+          }
           pipeline.addLast(new HttpClientCodec());
           pipeline.addLast(new HttpContentDecompressor());
           pipeline.addLast(new Http1InboundHandler());
           HandshakeManager.getInstance(context).completeHandshake(ctx.channel());
         } else {
-          logger.info(ctx.channel().remoteAddress().toString());
-          HandshakeManager.getInstance(context).failHandshake(ch,
-            new IllegalStateException("unknown protocol: " + protocol));
+          logger.error("unknown protocol " + protocol + " for channel: " + ctx.channel().remoteAddress().toString());
+          logger.warn("handle unknown protocol as http/1.1");
+//          HandshakeManager.getInstance(context).failHandshake(ch,
+//            new IllegalStateException("unknown protocol: " + protocol));
+          ctx.channel().attr(PROTOCOL_ATTRIBUTE_KEY).set(ApplicationProtocolNames.HTTP_1_1);
+          if (!context.httpsOnly) {
+            Http1ContentRecorder.getInstance(context)
+              .logVisitUrl(ctx.channel().attr(ChannelManager.TARGET_URL_KEY).get());
+          }
+          pipeline.addLast(new HttpClientCodec());
+          pipeline.addLast(new HttpContentDecompressor());
+          pipeline.addLast(new Http1InboundHandler());
+          HandshakeManager.getInstance(context).completeHandshake(ctx.channel());
         }
       }
     });

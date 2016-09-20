@@ -1,12 +1,17 @@
 package poseidon;
 
+import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelPromise;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import io.netty.util.internal.ConcurrentSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 
 /**
@@ -18,6 +23,8 @@ public class HandshakeManager {
   private static final Logger logger = LoggerFactory.getLogger(HandshakeManager.class);
   private static HandshakeManager ourInstance;
   private Context context = null;
+  private SettableFuture<Void> initFuture = SettableFuture.create();
+  private Set<Channel> handshakeInProgressChannels = new ConcurrentSet<>();
 
   private HandshakeManager(Context context) {
     this.context = context;
@@ -45,11 +52,17 @@ public class HandshakeManager {
   }
 
   public void waitHandshake(Channel channel, GenericFutureListener<Future<Void>> listener) {
-    channel.attr(HANDSHAKE_ATTRIBUTE_KEY).get().addListener(listener);
+    handshakeInProgressChannels.add(channel);
+    channel.attr(HANDSHAKE_ATTRIBUTE_KEY).get().addListeners(listener,
+      future -> handshakeInProgressChannels.remove(channel), future -> initFuture.set(null));
   }
 
-  public void waitHandshake(Channel channel) throws InterruptedException {
-    channel.attr(HANDSHAKE_ATTRIBUTE_KEY).get().await();
+  public boolean hasHandshakeInProgress() {
+    return !handshakeInProgressChannels.isEmpty();
+  }
+
+  public void waitHandshake() throws ExecutionException, InterruptedException {
+    initFuture.get();
   }
 
   public void failHandshake(Channel channel, Throwable cause) {

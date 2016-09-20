@@ -2,6 +2,8 @@ package poseidon;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.ssl.ApplicationProtocolNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.RequestUtil;
@@ -29,34 +31,52 @@ public class Client {
       return;
     }
     if (context.httpsOnly) {
-      Http1ContentRecorder.getInstance(context).logVisitUrl(url);
       ChannelManager.getInstance(context).getChannel(url, future -> {
         Channel channel = future.get();
         if (!HandshakeManager.getInstance(context).handshakeCompleted(channel)) {
           HandshakeManager.getInstance(context).initHandshakeContext(channel);
           HandshakeManager.getInstance(context).waitHandshake(channel,
-            future1 -> channel.writeAndFlush(RequestUtil.generateHttpsRequest(url)));
+            future1 -> sendRequest(url, channel, context));
         } else {
-          channel.writeAndFlush(RequestUtil.generateHttpsRequest(url));
+          sendRequest(url, channel, context);
         }
       });
     } else {
-      FullHttpRequest request = RequestUtil.generateHttp2Request(url);
-      Http2ContentRecorder.getInstance(context).logVisitUrl(url, RequestUtil.getStreamId(request));
       Channel channel = ChannelManager.getInstance(context).getChannelAndRelease(url, context);
       if (!HandshakeManager.getInstance(context).handshakeCompleted(channel)) {
         HandshakeManager.getInstance(context).initHandshakeContext(channel);
         HandshakeManager.getInstance(context).waitHandshake(channel,
-          future1 -> channel.writeAndFlush(request));
+          future1 -> sendRequest(url, channel, context));
       } else {
-        channel.writeAndFlush(request);
+        sendRequest(url, channel, context);
       }
     }
+
+  }
+
+  public void sendRequest(URL url, Channel channel, Context context) {
+    String protocol = channel.attr(ChannelPoolInitializer.PROTOCOL_ATTRIBUTE_KEY).get();
+    HttpRequest request;
+    if (ApplicationProtocolNames.HTTP_1_1.equals(protocol)) {
+      Http1ContentRecorder.getInstance(context).logVisitUrl(url);
+      request = RequestUtil.generateHttpsRequest(url);
+    } else if (ApplicationProtocolNames.HTTP_2.equals(protocol)) {
+      request = RequestUtil.generateHttp2Request(url);
+      Http2ContentRecorder.getInstance(context).logVisitUrl(url, RequestUtil.getStreamId((FullHttpRequest) request));
+    } else {
+      logger.error("illegal protocol: " + protocol);
+//      throw new IllegalArgumentException("illegal protocol: " + protocol);
+      Http1ContentRecorder.getInstance(context).logVisitUrl(url);
+      request = RequestUtil.generateHttpsRequest(url);
+    }
+    channel.writeAndFlush(request);
   }
 
   public void await(Context context) throws InterruptedException, ExecutionException {
+    HandshakeManager.getInstance(context).waitHandshake();
     Http1ContentRecorder.getInstance(context).waitCompletion();
     Http2ContentRecorder.getInstance(context).waitCompletion();
+//    Http1ContentRecorder.getInstance(context).waitCompletion();
     ChannelManager.getInstance(context).closeAll();
     ThreadManager.getInstance(context).getWorkingGroup().shutdownGracefully();
   }

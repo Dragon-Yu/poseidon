@@ -36,6 +36,7 @@ public class PoseidonMain {
     client.visit(url, context);
     client.await(context);
     long t4 = System.nanoTime();
+    logger.info(String.format("http2 completes in %,dns", t4 - t3));
     TcpdumpInfo tcpdumpInfo =
       TcpdumpManager.getInstance(context).stopMonitoring(ChannelPoolManager.getInstance(context).getTargetSet());
     TcpTrafficSize tcpTrafficSize = TcpTrafficRecorder.getInstance(context).getTcpTrafficSize();
@@ -52,6 +53,7 @@ public class PoseidonMain {
     client.visit(url, context);
     client.await(context);
     long t2 = System.nanoTime();
+    logger.info(String.format("http1 completes in %,dns", t2 - t1));
     TcpdumpInfo tcpdumpInfo =
       TcpdumpManager.getInstance(context).stopMonitoring(ChannelPoolManager.getInstance(context).getTargetSet());
     TcpTrafficSize tcpTrafficSize = TcpTrafficRecorder.getInstance(context).getTcpTrafficSize();
