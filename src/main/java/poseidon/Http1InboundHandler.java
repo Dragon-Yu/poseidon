@@ -6,6 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import org.apache.http.entity.ContentType;
+import org.apache.http.util.TextUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import parse.HtmlParser;
@@ -35,16 +36,22 @@ public class Http1InboundHandler extends SimpleChannelInboundHandler<HttpObject>
         ByteBuf content = Http1ContentRecorder.getInstance(context).popContent(ctx.channel());
         byte[] bytes = new byte[content.readableBytes()];
         content.readBytes(bytes);
+        content.release();
         ChannelManager.getInstance(context).release(ctx.channel());
-        handleContent(bytes, ctx, ContentType.parse(Http1ContentRecorder.getInstance(context)
-          .getHttpMessage(ctx.channel()).headers().get(HttpHeaderNames.CONTENT_TYPE)), context);
+        String contentTypeStr = Http1ContentRecorder.getInstance(context)
+          .getHttpMessage(ctx.channel()).headers().get(HttpHeaderNames.CONTENT_TYPE);
+        ContentType contentType = null;
+        if (!TextUtils.isEmpty(contentTypeStr)) {
+          contentType = ContentType.parse(contentTypeStr);
+        }
+        handleContent(bytes, ctx, contentType, context);
       }
     }
   }
 
   private void handleContent(byte[] content, ChannelHandlerContext ctx, ContentType contentType, Context context) {
 //    logger.info("content size: " + content.length + " for url: " + ctx.channel().attr(ChannelManager.TARGET_URL_KEY));
-    if (!contentType.getMimeType().equals(ContentType.TEXT_HTML.getMimeType())) {
+    if (contentType == null || !contentType.getMimeType().equals(ContentType.TEXT_HTML.getMimeType())) {
       Http1ContentRecorder.getInstance(context).updateCompleteStatus();
       return;
     }
