@@ -21,7 +21,7 @@ public class BaseTestConfig {
   private static final String ATTR_HOSTS_TO_CHECK = "hosts_to_check";
   private static final String ATTR_TCPDUMP_CMD = "tcpdump_cmd";
   private static final String ATTR_LOG_TCPDUMP_OUTPUT = "log_tcpdump_output";
-  private static final String ATTR_IGNORE_OUTTER_LINK = "ignore_outter_link";
+  private static final String ATTR_IGNORE_OUTER_LINK = "ignore_outer_link";
   public static int REQUEST_TIMES = 20;
   public static int CHANNEL_POOL_SIZE = 20;
   public static boolean LOG_TCPDUMP_OUTPUT = false;
