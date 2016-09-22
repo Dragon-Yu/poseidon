@@ -1,5 +1,6 @@
 package poseidon;
 
+import config.BaseTestConfig;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -14,6 +15,7 @@ import parse.HtmlParser;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by Johnson on 16/9/10.
@@ -45,7 +47,15 @@ public class Http2InboundHandler extends SimpleChannelInboundHandler<FullHttpRes
         String targetHost = ctx.channel().attr(ChannelManager.TARGET_URL_KEY).get().getHost();
         Set<URL> urlSet = parser.getLinks(html, "https://" + targetHost);
         for (URL url : urlSet) {
-          ctx.channel().attr(ChannelManager.CONTEXT_ATTRIBUTE_KEY).get().client.visit(url, context);
+          if (!BaseTestConfig.IGNORE_OUTER_LINK || url.getHost().equals(targetHost)) {
+            try {
+              ctx.channel().attr(ChannelManager.CONTEXT_ATTRIBUTE_KEY).get().client.visit(url, context);
+            } catch (InterruptedException | ExecutionException e) {
+              logger.error(e.getMessage(), e);
+            }
+          } else {
+//        logger.info("ignore url: " + url);
+          }
         }
       }
     }

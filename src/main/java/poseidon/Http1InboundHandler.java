@@ -36,7 +36,6 @@ public class Http1InboundHandler extends SimpleChannelInboundHandler<HttpObject>
         ByteBuf content = Http1ContentRecorder.getInstance(context).popContent(ctx.channel());
         byte[] bytes = new byte[content.readableBytes()];
         content.readBytes(bytes);
-        content.release();
         ChannelManager.getInstance(context).release(ctx.channel());
         String contentTypeStr = Http1ContentRecorder.getInstance(context)
           .getHttpMessage(ctx.channel()).headers().get(HttpHeaderNames.CONTENT_TYPE);
