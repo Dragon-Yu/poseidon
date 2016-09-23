@@ -5,6 +5,7 @@ import io.netty.channel.pool.ChannelPool;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import io.netty.util.internal.ConcurrentSet;
 import io.netty.util.internal.chmv8.ConcurrentHashMapV8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import util.SimpleUrl;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -27,6 +29,7 @@ public class ChannelManager {
   public static final AttributeKey<ChannelPool> CHANNEL_POOL_ATTRIBUTE_KEY = AttributeKey.newInstance(CHANNEL_POOL_ATTR);
   private static final Logger logger = LoggerFactory.getLogger(ChannelManager.class);
   private static ChannelManager ourInstance;
+  Set<SimpleUrl> blockedHost = new ConcurrentSet<>();
   private Map<SimpleUrl, Channel> singleChannelMap = new ConcurrentHashMapV8<>();
   private Context context = null;
 
@@ -58,11 +61,27 @@ public class ChannelManager {
     AddressManager.getInstance(context).setLocalIp((InetSocketAddress) channel.localAddress());
   }
 
+  public void addBlockedHost(SimpleUrl simpleUrl) {
+    logger.info("add blocked host: " + simpleUrl);
+    blockedHost.add(simpleUrl);
+  }
+
+  public Set<SimpleUrl> getBlockedHost() {
+    return blockedHost;
+  }
+
+  public boolean isBlocked(URL url) {
+    return blockedHost.contains(new SimpleUrl(url));
+  }
+
   public void getChannel(URL url, GenericFutureListener<Future<Channel>> listener) {
     try {
       ChannelPool channelPool = ChannelPoolManager.getInstance(context).getChannelPool(url);
-      channelPool.acquire()
-        .addListeners(future -> initChannelContext((Channel) future.get(), channelPool, context, url), listener);
+      channelPool.acquire().addListeners(future -> {
+        if (future.isSuccess()) {
+          initChannelContext((Channel) future.get(), channelPool, context, url);
+        }
+      }, listener);
     } catch (ExecutionException e) {
       logger.error(e.getMessage(), e);
     }

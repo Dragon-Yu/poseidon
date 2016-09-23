@@ -52,6 +52,7 @@ public class Http2ContentRecorder {
 
   public void waitCompletion() throws InterruptedException, ExecutionException {
     if (!traceInfoMap.isEmpty()) {
+      logger.info("wait http2 to complete");
       completeFuture.get();
     }
   }
@@ -70,7 +71,6 @@ public class Http2ContentRecorder {
 
   public void updateCompleteStatus() {
     if (urlOnTheAir.isEmpty()) {
-      logger.info("wait http2 to complete");
       completeFuture.set(null);
     }
   }

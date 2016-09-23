@@ -30,15 +30,36 @@ public class Client {
       logger.warn("duplicate url visitation: " + url);
       return;
     }
+    if (ChannelManager.getInstance(context).isBlocked(url)) {
+      logger.warn("ignore blocked url: " + url);
+      return;
+    }
+    if (url.getDefaultPort() == 80) {
+      logger.warn("ignore http requests: " + url);
+      return;
+    }
     if (context.httpsOnly) {
+      Http1ContentRecorder.getInstance(context).logVisitUrl(url);
       ChannelManager.getInstance(context).getChannel(url, future -> {
-        Channel channel = future.get();
-        if (!HandshakeManager.getInstance(context).handshakeCompleted(channel)) {
-          HandshakeManager.getInstance(context).initHandshakeContext(channel);
-          HandshakeManager.getInstance(context).waitHandshake(channel,
-            future1 -> sendRequest(url, channel, context));
+        if (future.isSuccess()) {
+          Channel channel = future.get();
+          if (!HandshakeManager.getInstance(context).handshakeCompleted(channel)) {
+            HandshakeManager.getInstance(context).initHandshakeContext(channel);
+            HandshakeManager.getInstance(context).waitHandshake(channel,
+              future1 -> {
+                if (future1.isSuccess()) {
+                  sendRequest(url, channel, context);
+                } else {
+                  logger.warn("handshake failed for channel: " + channel + ", url: " + url);
+                  Http1ContentRecorder.getInstance(context).clearTrace(url);
+                }
+              });
+          } else {
+            sendRequest(url, channel, context);
+          }
         } else {
-          sendRequest(url, channel, context);
+          logger.error("get channel failed for url: " + url);
+          Http1ContentRecorder.getInstance(context).clearTrace(url);
         }
       });
     } else {
@@ -51,7 +72,6 @@ public class Client {
         sendRequest(url, channel, context);
       }
     }
-
   }
 
   public void sendRequest(URL url, Channel channel, Context context) {
@@ -74,9 +94,8 @@ public class Client {
 
   public void await(Context context) throws InterruptedException, ExecutionException {
     HandshakeManager.getInstance(context).waitHandshake();
-    Http1ContentRecorder.getInstance(context).waitCompletion();
     Http2ContentRecorder.getInstance(context).waitCompletion();
-//    Http1ContentRecorder.getInstance(context).waitCompletion();
+    Http1ContentRecorder.getInstance(context).waitCompletion();
     ChannelManager.getInstance(context).closeAll();
     ThreadManager.getInstance(context).getWorkingGroup().shutdownGracefully();
   }

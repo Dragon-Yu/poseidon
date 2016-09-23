@@ -84,9 +84,15 @@ public class Http1ContentRecorder {
     traceInfoMap.put(url, new TraceInfo(url));
   }
 
+  public void clearTrace(URL url) {
+    urlOnTheAir.remove(url);
+    traceInfoMap.remove(url);
+    updateCompleteStatus();
+  }
+
   public void logCompleteUrl(Channel channel) {
-//    logger.info("complete channel: " + channel);
     URL url = channel.attr(ChannelManager.TARGET_URL_KEY).get();
+//    logger.info("complete channel: " + channel + ", url: " + url);
     urlOnTheAir.remove(url);
     traceInfoMap.get(url).finish(channel.id().asShortText(), System.nanoTime());
   }

@@ -2,8 +2,10 @@ package poseidon;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.pool.AbstractChannelPoolHandler;
+import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpContentDecompressor;
 import io.netty.handler.codec.http2.*;
@@ -12,7 +14,10 @@ import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler;
 import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.SimpleUrl;
 import util.SslUtil;
+
+import java.net.InetSocketAddress;
 
 /**
  * Created by Johnson on 16/9/10.
@@ -45,6 +50,15 @@ public class ChannelPoolInitializer extends AbstractChannelPoolHandler {
     } else {
       pipeline.addLast(SslUtil.getSslContextForHttp2().newHandler(ch.alloc()));
     }
+
+    //ignore alpn exception
+    pipeline.addLast(new ChannelInboundHandlerAdapter() {
+      @Override
+      public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        logger.warn(cause.getMessage());
+      }
+    });
+
     pipeline.addLast(new ApplicationProtocolNegotiationHandler(ApplicationProtocolNames.HTTP_1_1) {
       @Override
       protected void configurePipeline(ChannelHandlerContext ctx, String protocol) throws Exception {
@@ -81,6 +95,25 @@ public class ChannelPoolInitializer extends AbstractChannelPoolHandler {
           pipeline.addLast(new Http1InboundHandler());
           HandshakeManager.getInstance(context).completeHandshake(ctx.channel());
         }
+      }
+
+      @Override
+      protected void handshakeFailure(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        handleException(ctx, cause);
+      }
+
+      @Override
+      public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        handleException(ctx, cause);
+      }
+
+      private void handleException(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        InetSocketAddress address = ((NioSocketChannel) ctx.channel()).remoteAddress();
+        ChannelManager.getInstance(context).addBlockedHost(
+          new SimpleUrl(address.getHostName(), address.getAddress().getHostAddress(), address.getPort()));
+        HandshakeManager.getInstance(context).failHandshake(ctx.channel(), cause);
+        ctx.close();
+        ChannelManager.getInstance(context).release(ctx.channel());
       }
     });
   }

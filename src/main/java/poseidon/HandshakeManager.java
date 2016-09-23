@@ -66,7 +66,7 @@ public class HandshakeManager {
   }
 
   public void failHandshake(Channel channel, Throwable cause) {
-    channel.attr(HANDSHAKE_ATTRIBUTE_KEY).get().setFailure(cause);
+    channel.attr(HANDSHAKE_ATTRIBUTE_KEY).get().tryFailure(cause);
   }
 
   public void completeHandshake(Channel channel) {

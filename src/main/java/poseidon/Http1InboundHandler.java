@@ -70,11 +70,9 @@ public class Http1InboundHandler extends SimpleChannelInboundHandler<HttpObject>
           logger.error(e.getMessage(), e);
         }
       } else {
-//        logger.info("ignore url: " + url);
+        logger.info("ignore outer link: " + url);
       }
     }
-    if (urlSet.isEmpty()) {
-      Http1ContentRecorder.getInstance(context).updateCompleteStatus();
-    }
+    Http1ContentRecorder.getInstance(context).updateCompleteStatus();
   }
 }
