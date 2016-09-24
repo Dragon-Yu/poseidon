@@ -48,10 +48,10 @@ public class ChannelManager {
   }
 
   private void initChannelContext(Channel channel, ChannelPool channelPool, Context context, URL url) {
-    if (!channel.hasAttr(CONTEXT_ATTRIBUTE_KEY)) {
+    if (!channel.hasAttr(CONTEXT_ATTRIBUTE_KEY) || channel.attr(CONTEXT_ATTRIBUTE_KEY).get() == null) {
       channel.attr(CONTEXT_ATTRIBUTE_KEY).set(context);
     }
-    if (!channel.hasAttr(CHANNEL_POOL_ATTRIBUTE_KEY)) {
+    if (!channel.hasAttr(CHANNEL_POOL_ATTRIBUTE_KEY) || channel.attr(CHANNEL_POOL_ATTRIBUTE_KEY).get() == null) {
       channel.attr(CHANNEL_POOL_ATTRIBUTE_KEY).set(channelPool);
     }
     channel.attr(TARGET_URL_KEY).set(url);
