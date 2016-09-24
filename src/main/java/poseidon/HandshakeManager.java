@@ -44,7 +44,7 @@ public class HandshakeManager {
   }
 
   public synchronized void initHandshakeContext(Channel channel) {
-    if (!channel.hasAttr(HANDSHAKE_ATTRIBUTE_KEY)) {
+    if (!channel.hasAttr(HANDSHAKE_ATTRIBUTE_KEY) || channel.attr(HANDSHAKE_ATTRIBUTE_KEY).get() == null) {
       channel.attr(HANDSHAKE_ATTRIBUTE_KEY).set(channel.newPromise());
     } else {
       logger.debug("duplicate handshake initiation");
@@ -52,6 +52,7 @@ public class HandshakeManager {
   }
 
   public void waitHandshake(Channel channel, GenericFutureListener<Future<Void>> listener) {
+    initHandshakeContext(channel);
     handshakeInProgressChannels.add(channel);
     channel.attr(HANDSHAKE_ATTRIBUTE_KEY).get().addListeners(listener,
       future -> handshakeInProgressChannels.remove(channel), future -> initFuture.set(null));
@@ -66,10 +67,12 @@ public class HandshakeManager {
   }
 
   public void failHandshake(Channel channel, Throwable cause) {
+    initHandshakeContext(channel);
     channel.attr(HANDSHAKE_ATTRIBUTE_KEY).get().tryFailure(cause);
   }
 
   public void completeHandshake(Channel channel) {
+    initHandshakeContext(channel);
     channel.attr(HANDSHAKE_ATTRIBUTE_KEY).get().setSuccess();
   }
 }

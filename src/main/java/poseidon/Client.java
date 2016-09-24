@@ -43,7 +43,6 @@ public class Client {
       ChannelManager.getInstance(context).getChannel(url, future -> {
         if (future.isSuccess()) {
           Channel channel = future.get();
-          HandshakeManager.getInstance(context).initHandshakeContext(channel);
           HandshakeManager.getInstance(context).waitHandshake(channel, future1 -> {
             if (future1.isSuccess()) {
               sendRequest(url, channel, context);
@@ -62,7 +61,6 @@ public class Client {
       ChannelManager.getInstance(context).getChannelAndRelease(url, future -> {
         if (future.isSuccess()) {
           Channel channel = future.get();
-          HandshakeManager.getInstance(context).initHandshakeContext(channel);
           HandshakeManager.getInstance(context).waitHandshake(channel, future1 -> {
             if (future1.isSuccess()) {
               sendRequest(url, channel, context);

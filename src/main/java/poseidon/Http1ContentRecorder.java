@@ -105,7 +105,7 @@ public class Http1ContentRecorder {
   public void updateCompleteStatus() {
 //    logger.info("update complete status");
     logger.debug(urlOnTheAir.toString());
-    if (urlOnTheAir.isEmpty() && !HandshakeManager.getInstance(context).hasHandshakeInProgress()) {
+    if (urlOnTheAir.isEmpty()) {
       completionFuture.set(null);
     }
   }
