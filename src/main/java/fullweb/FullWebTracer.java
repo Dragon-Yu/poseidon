@@ -1,5 +1,7 @@
 package fullweb;
 
+import io.netty.handler.ssl.ApplicationProtocolNames;
+
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,7 +21,7 @@ public class FullWebTracer {
 
   public synchronized void start(URL url) {
     urlWaitingQueue.add(url);
-    TraceInfo info = new TraceInfo(url);
+    TraceInfo info = new TraceInfo(url, ApplicationProtocolNames.HTTP_1_1);
     info.setRequestTimeStamp(System.nanoTime());
     trace.put(url, info);
   }

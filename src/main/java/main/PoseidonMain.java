@@ -2,6 +2,7 @@ package main;
 
 import config.BaseTestConfig;
 import entity.*;
+import fullweb.TraceInfo;
 import network.RedirectionDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,8 @@ import util.Uploader;
 
 import java.net.URI;
 import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by Johnson on 16/9/7.
@@ -42,8 +45,10 @@ public class PoseidonMain {
     TcpdumpInfo tcpdumpInfo =
       TcpdumpManager.getInstance(context).stopMonitoring(ChannelPoolManager.getInstance(context).getTargetSet());
     TcpTrafficSize tcpTrafficSize = TcpTrafficRecorder.getInstance(context).getTcpTrafficSize();
-    ExperimentData experimentData = new ExperimentData(Http2ContentRecorder.getInstance(context).getTraceInfoList(),
-      tcpTrafficSize, tcpdumpInfo, t4 - t3);
+    List<TraceInfo> traceInfoList = new LinkedList<>();
+    traceInfoList.addAll(Http2ContentRecorder.getInstance(context).getTraceInfoList());
+    traceInfoList.addAll(Http1ContentRecorder.getInstance(context).getTraceInfoList());
+    ExperimentData experimentData = new ExperimentData(traceInfoList, tcpTrafficSize, tcpdumpInfo, t4 - t3);
     http2Unsupported = context.isHttp2Unsupported();
     if (!context.getOtherProtocols().isEmpty()) {
       logger.error(context.getOtherProtocols().toString());

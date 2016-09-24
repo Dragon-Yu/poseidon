@@ -54,7 +54,7 @@ public class Http2InboundHandler extends SimpleChannelInboundHandler<FullHttpRes
               logger.error(e.getMessage(), e);
             }
           } else {
-//        logger.info("ignore url: " + url);
+//        logger.info("ignore outer link: " + url);
           }
         }
       }

@@ -22,8 +22,10 @@ public class BaseTestConfig {
   private static final String ATTR_TCPDUMP_CMD = "tcpdump_cmd";
   private static final String ATTR_LOG_TCPDUMP_OUTPUT = "log_tcpdump_output";
   private static final String ATTR_IGNORE_OUTER_LINK = "ignore_outer_link";
+  private static final String ATTR_HTTP2_CHANNEL_POOL_SIZE = "http2_channel_pool_size";
   public static int REQUEST_TIMES = 20;
   public static int CHANNEL_POOL_SIZE = 20;
+  public static int HTTP2_CHANNEL_POOL_SIZE = 1;
   public static boolean LOG_TCPDUMP_OUTPUT = false;
   public static boolean IGNORE_OUTER_LINK = false;
   public static String URI = "https://pay.sohu.com/payment/index.action";

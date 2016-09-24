@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import http2.client.Http2ClientInitializer;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.ssl.ApplicationProtocolNames;
 import io.netty.handler.ssl.SslContext;
 import io.netty.util.internal.ConcurrentSet;
 
@@ -44,7 +45,7 @@ public class FullWebHttp2ClientInitializer extends Http2ClientInitializer implem
 
   public synchronized void visitUrl(URL url, Channel channel) {
     visitedUrls.add(url);
-    TraceInfo info = new TraceInfo(url);
+    TraceInfo info = new TraceInfo(url, ApplicationProtocolNames.HTTP_2);
     info.setRequestTimeStamp(System.nanoTime());
     tracerInfoMap.put(url, info);
   }

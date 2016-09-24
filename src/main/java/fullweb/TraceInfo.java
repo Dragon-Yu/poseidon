@@ -21,9 +21,12 @@ public class TraceInfo {
   @SerializedName("url")
   private URL url;
 
-  public TraceInfo(URL url) {
+  private String protocol;
+
+  public TraceInfo(URL url, String protocol) {
     this.requestTimeStamp = System.nanoTime();
     this.url = url;
+    this.protocol = protocol;
   }
 
   public TraceInfo(URL url, long requestTimeStamp) {

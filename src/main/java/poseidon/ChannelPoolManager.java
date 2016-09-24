@@ -43,7 +43,9 @@ public class ChannelPoolManager {
         bootstrap.group(ThreadManager.getInstance(context).getWorkingGroup())
           .channel(NioSocketChannel.class)
           .remoteAddress(key.getAddr(), key.getPort());
-        return new FixedChannelPool(bootstrap, channelPoolHandler, BaseTestConfig.CHANNEL_POOL_SIZE);
+        int channelPoolSize =
+          context.httpsOnly ? BaseTestConfig.CHANNEL_POOL_SIZE : BaseTestConfig.HTTP2_CHANNEL_POOL_SIZE;
+        return new FixedChannelPool(bootstrap, channelPoolHandler, channelPoolSize);
       }
     });
   }

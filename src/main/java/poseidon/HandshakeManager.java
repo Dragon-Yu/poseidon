@@ -43,11 +43,11 @@ public class HandshakeManager {
     return channel.hasAttr(HANDSHAKE_ATTRIBUTE_KEY);
   }
 
-  public void initHandshakeContext(Channel channel) {
+  public synchronized void initHandshakeContext(Channel channel) {
     if (!channel.hasAttr(HANDSHAKE_ATTRIBUTE_KEY)) {
       channel.attr(HANDSHAKE_ATTRIBUTE_KEY).set(channel.newPromise());
     } else {
-      logger.warn("duplicate handshake initiation");
+      logger.debug("duplicate handshake initiation");
     }
   }
 

@@ -6,14 +6,12 @@ import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.internal.ConcurrentSet;
-import io.netty.util.internal.chmv8.ConcurrentHashMapV8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.SimpleUrl;
 
 import java.net.InetSocketAddress;
 import java.net.URL;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -30,7 +28,6 @@ public class ChannelManager {
   private static final Logger logger = LoggerFactory.getLogger(ChannelManager.class);
   private static ChannelManager ourInstance;
   Set<SimpleUrl> blockedHost = new ConcurrentSet<>();
-  private Map<SimpleUrl, Channel> singleChannelMap = new ConcurrentHashMapV8<>();
   private Context context = null;
 
   private ChannelManager(Context context) {
@@ -87,15 +84,26 @@ public class ChannelManager {
     }
   }
 
+  public void getChannelAndRelease(URL url, GenericFutureListener<Future<Channel>> listener) {
+    try {
+      ChannelPool channelPool = ChannelPoolManager.getInstance(context).getChannelPool(url);
+      channelPool.acquire().addListeners(future -> {
+        if (future.isSuccess()) {
+          Channel channel = (Channel) future.get();
+          initChannelContext(channel, channelPool, context, url);
+          channelPool.release(channel);
+        }
+      }, listener);
+    } catch (ExecutionException e) {
+      logger.error(e.getMessage(), e);
+    }
+  }
+
   public synchronized Channel getChannelAndRelease(URL url, Context context)
     throws InterruptedException, ExecutionException {
-    if (singleChannelMap.containsKey(new SimpleUrl(url))) {
-      return singleChannelMap.get(new SimpleUrl(url));
-    }
     ChannelPool channelPool = ChannelPoolManager.getInstance(context).getChannelPool(url);
     Channel channel = channelPool.acquire().get();
     channelPool.release(channel);
-    singleChannelMap.put(new SimpleUrl(url), channel);
     initChannelContext(channel, channelPool, context, url);
     return channel;
   }

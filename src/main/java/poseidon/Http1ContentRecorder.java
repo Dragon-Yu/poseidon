@@ -7,6 +7,7 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.http.HttpMessage;
+import io.netty.handler.ssl.ApplicationProtocolNames;
 import io.netty.util.internal.ConcurrentSet;
 import io.netty.util.internal.chmv8.ConcurrentHashMapV8;
 import org.slf4j.Logger;
@@ -79,9 +80,9 @@ public class Http1ContentRecorder {
   }
 
   public void logVisitUrl(URL url) {
-//    logger.info("visit url: " + url);
+    logger.debug("visit url: " + url);
     urlOnTheAir.add(url);
-    traceInfoMap.put(url, new TraceInfo(url));
+    traceInfoMap.put(url, new TraceInfo(url, ApplicationProtocolNames.HTTP_1_1));
   }
 
   public void clearTrace(URL url) {
@@ -92,7 +93,7 @@ public class Http1ContentRecorder {
 
   public void logCompleteUrl(Channel channel) {
     URL url = channel.attr(ChannelManager.TARGET_URL_KEY).get();
-//    logger.info("complete channel: " + channel + ", url: " + url);
+    logger.debug("complete channel: " + channel + ", url: " + url);
     urlOnTheAir.remove(url);
     traceInfoMap.get(url).finish(channel.id().asShortText(), System.nanoTime());
   }
@@ -103,6 +104,7 @@ public class Http1ContentRecorder {
 
   public void updateCompleteStatus() {
 //    logger.info("update complete status");
+    logger.debug(urlOnTheAir.toString());
     if (urlOnTheAir.isEmpty() && !HandshakeManager.getInstance(context).hasHandshakeInProgress()) {
       completionFuture.set(null);
     }

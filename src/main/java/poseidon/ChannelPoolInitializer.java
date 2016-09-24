@@ -55,14 +55,14 @@ public class ChannelPoolInitializer extends AbstractChannelPoolHandler {
     pipeline.addLast(new ChannelInboundHandlerAdapter() {
       @Override
       public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.warn(cause.getMessage());
+        logger.warn(cause.getMessage() + " for channel: " + ctx.channel());
       }
     });
 
     pipeline.addLast(new ApplicationProtocolNegotiationHandler(ApplicationProtocolNames.HTTP_1_1) {
       @Override
       protected void configurePipeline(ChannelHandlerContext ctx, String protocol) throws Exception {
-//        logger.info("protocol: " + protocol);
+        logger.debug("protocol: " + protocol + " for channel: " + ctx.channel());
         ctx.channel().attr(PROTOCOL_ATTRIBUTE_KEY).set(protocol);
         if (ApplicationProtocolNames.HTTP_2.equals(protocol)) {
           pipeline.addLast(createHttpToHttp2ConnectionHandler());
@@ -71,6 +71,9 @@ public class ChannelPoolInitializer extends AbstractChannelPoolHandler {
         } else if (ApplicationProtocolNames.HTTP_1_1.equals(protocol)) {
           if (!context.httpsOnly) {
             context.setHttp2Unsupported(true);
+            //move record from http/2 to http/1.x
+            Http2ContentRecorder.getInstance(context)
+              .clearTrace(ctx.channel().attr(ChannelManager.TARGET_URL_KEY).get());
             Http1ContentRecorder.getInstance(context)
               .logVisitUrl(ctx.channel().attr(ChannelManager.TARGET_URL_KEY).get());
           }

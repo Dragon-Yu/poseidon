@@ -3,7 +3,11 @@ package poseidon;
 import com.google.common.util.concurrent.SettableFuture;
 import fullweb.TraceInfo;
 import io.netty.channel.Channel;
+import io.netty.handler.ssl.ApplicationProtocolNames;
+import io.netty.util.internal.ConcurrentSet;
 import io.netty.util.internal.chmv8.ConcurrentHashMapV8;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +15,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -20,7 +25,8 @@ public class Http2ContentRecorder {
   private static final Logger logger = LoggerFactory.getLogger(Http2ContentRecorder.class);
   private static Http2ContentRecorder ourInstance;
   SettableFuture<Void> completeFuture = SettableFuture.create();
-  Map<Integer, URL> urlOnTheAir = new ConcurrentHashMapV8<>();
+  Set<URL> urlOnTheAirSet = new ConcurrentSet<>();
+  Map<Pair<Channel, Integer>, URL> urlOnTheAir = new ConcurrentHashMapV8<>();
   Map<URL, TraceInfo> traceInfoMap = new ConcurrentHashMapV8<>();
   private Context context = null;
 
@@ -37,16 +43,21 @@ public class Http2ContentRecorder {
     return ourInstance;
   }
 
-  public void logVisitUrl(URL url, int streamId) {
-//    logger.info("visit url: " + url + " on stream: " + streamId);
-    urlOnTheAir.put(streamId, url);
-    traceInfoMap.put(url, new TraceInfo(url));
+  public void logPreVisitUrl(URL url) {
+    urlOnTheAirSet.add(url);
+  }
+
+  public void logVisitUrl(Channel channel, URL url, int streamId) {
+    logger.debug("visit url: " + url + " on stream: " + streamId);
+    urlOnTheAir.put(new ImmutablePair<>(channel, streamId), url);
+    urlOnTheAirSet.remove(url);
+    traceInfoMap.put(url, new TraceInfo(url, ApplicationProtocolNames.HTTP_2));
   }
 
   public void logCompleteUrl(int streamId, Channel channel) {
-//    logger.info("complete stream: " + streamId);
-    URL url = urlOnTheAir.get(streamId);
-    urlOnTheAir.remove(streamId);
+    URL url = urlOnTheAir.get(new ImmutablePair<>(channel, streamId));
+    logger.debug("complete stream: " + streamId + " on channel: " + channel + ", url: " + url);
+    urlOnTheAir.remove(new ImmutablePair<>(channel, streamId));
     traceInfoMap.get(url).finish(channel.id().asShortText(), System.nanoTime());
   }
 
@@ -70,8 +81,14 @@ public class Http2ContentRecorder {
   }
 
   public void updateCompleteStatus() {
-    if (urlOnTheAir.isEmpty()) {
+    logger.debug(String.format("%s, %s", urlOnTheAir.values().toString(), urlOnTheAirSet.toString()));
+    if (urlOnTheAirSet.isEmpty() && urlOnTheAir.isEmpty()) {
       completeFuture.set(null);
     }
+  }
+
+  public void clearTrace(URL url) {
+    urlOnTheAirSet.remove(url);
+    updateCompleteStatus();
   }
 }
