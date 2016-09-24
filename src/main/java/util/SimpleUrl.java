@@ -28,7 +28,7 @@ public class SimpleUrl {
     try {
       addr = InetAddress.getByName(host).getHostAddress();
     } catch (UnknownHostException e) {
-      logger.error(e.getMessage(), e);
+      logger.error(e.getMessage());
     } finally {
       this.addr = addr;
     }

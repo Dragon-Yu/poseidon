@@ -34,7 +34,7 @@ public class Http2InboundHandler extends SimpleChannelInboundHandler<FullHttpRes
       int contentLength = content.readableBytes();
       byte[] arr = new byte[contentLength];
       content.readBytes(arr);
-//      logger.info("content size: " + arr.length + " for stream: " + streamId);
+      logger.debug("content size: " + arr.length + " for stream: " + streamId);
 
       //only parse html content
       if (contentType.getMimeType().equals(ContentType.TEXT_HTML.getMimeType())) {

@@ -49,7 +49,7 @@ public class Http1InboundHandler extends SimpleChannelInboundHandler<HttpObject>
   }
 
   private void handleContent(byte[] content, ChannelHandlerContext ctx, ContentType contentType, Context context) {
-//    logger.info("content size: " + content.length + " for url: " + ctx.channel().attr(ChannelManager.TARGET_URL_KEY));
+    logger.debug("content size: " + content.length + " for url: " + ctx.channel().attr(ChannelManager.TARGET_URL_KEY));
     if (contentType == null || !contentType.getMimeType().equals(ContentType.TEXT_HTML.getMimeType())) {
       Http1ContentRecorder.getInstance(context).updateCompleteStatus();
       return;
