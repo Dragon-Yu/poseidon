@@ -26,6 +26,9 @@ public class PoseidonMain {
     uri = new RedirectionDetector(uri.toURL()).autoRedirect().toURI();
     logger.info("uri redirected to: " + uri);
 
+    //warm up
+    http2(uri.toURL());
+
     ExperimentData http1ExperimentData = http1(uri.toURL());
     ExperimentData http2ExperimentData = http2(uri.toURL());
     PoseidonData poseidonData =

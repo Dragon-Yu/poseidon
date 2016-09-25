@@ -27,7 +27,7 @@ public class Client {
   public void visit(URL url, Context context) throws InterruptedException, ExecutionException {
     if (Http1ContentRecorder.getInstance(context).visited(url) ||
       Http2ContentRecorder.getInstance(context).visited(url)) {
-      logger.debug("duplicate url visitation: " + url);
+//      logger.debug("duplicate url visitation: " + url);
       return;
     }
     if (ChannelManager.getInstance(context).isBlocked(url)) {

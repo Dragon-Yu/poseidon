@@ -84,6 +84,7 @@ public class Uploader {
   }
 
   public void uploadPoseidonRequest(PoseidonData poseidonData) throws IOException {
+//    logger.info(new Gson().toJson(poseidonData));
     URL url = new URL(BaseTestConfig.POSEIDON_LOG_URL);
     String response = post(url, new Gson().toJson(poseidonData));
     logger.info(response);
