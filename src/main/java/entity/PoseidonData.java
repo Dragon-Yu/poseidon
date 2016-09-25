@@ -21,6 +21,5 @@ public class PoseidonData {
     this.http2Data = http2Data;
     this.config = config;
     this.http2Unsupported = http2Unsupported;
-    this.note = "non_parallel";
   }
 }
