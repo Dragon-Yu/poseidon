@@ -45,7 +45,7 @@ public class Client {
           Channel channel = future.get();
           HandshakeManager.getInstance(context).waitHandshake(channel, future1 -> {
             if (future1.isSuccess()) {
-              sendRequest(url, channel, context);
+              sendHttp1Request(channel, url, context);
             } else {
               logger.warn("handshake failed for channel: " + channel + ", url: " + url);
               Http1ContentRecorder.getInstance(context).clearTrace(url);
@@ -79,22 +79,41 @@ public class Client {
 
   public void sendRequest(URL url, Channel channel, Context context) {
     String protocol = channel.attr(ChannelPoolInitializer.PROTOCOL_ATTRIBUTE_KEY).get();
-    HttpRequest request;
-    logger.debug("protocol:" + protocol + " for channel: " + channel + ", url: " + url);
     if (ApplicationProtocolNames.HTTP_1_1.equals(protocol)) {
-      Http1ContentRecorder.getInstance(context).logVisitUrl(url);
-      request = RequestUtil.generateHttpsRequest(url);
+      sendHttp1Request(url, context);
     } else if (ApplicationProtocolNames.HTTP_2.equals(protocol)) {
-      request = RequestUtil.generateHttp2Request(url);
-      Http2ContentRecorder.getInstance(context).logVisitUrl(channel, url,
-        RequestUtil.getStreamId((FullHttpRequest) request));
+      sendHttp2Request(channel, url, context);
     } else {
-      logger.error("illegal protocol: " + protocol + " for channel: " + channel);
 //      throw new IllegalArgumentException("illegal protocol: " + protocol);
-      Http1ContentRecorder.getInstance(context).logVisitUrl(url);
-      request = RequestUtil.generateHttpsRequest(url);
+      logger.error("illegal protocol: " + protocol + " for channel: " + channel);
+      sendHttp1Request(url, context);
     }
+  }
+
+  private void sendHttp1Request(Channel channel, URL url, Context context) {
+    logger.debug("send http1 request to channel: " + channel + ", url: " + url);
+    Http1ContentRecorder.getInstance(context).logVisitUrl(url);
+    HttpRequest request = RequestUtil.generateHttpsRequest(url);
     channel.writeAndFlush(request);
+  }
+
+  /**
+   * send http/1.x request when the server do not supports http/2
+   */
+  private void sendHttp1Request(URL url, Context context) {
+    Http2ContentRecorder.getInstance(context).clearTrace(url);
+    ChannelManager.getInstance(context).getChannel(url, future -> {
+      Channel channel = future.get();
+      sendHttp1Request(channel, url, context);
+    });
+  }
+
+  private void sendHttp2Request(Channel channel, URL url, Context context) {
+    logger.debug("send http2 request to channel: " + channel + ", url: " + url);
+    FullHttpRequest request = RequestUtil.generateHttp2Request(url);
+    Http2ContentRecorder.getInstance(context).logVisitUrl(channel, url, RequestUtil.getStreamId(request));
+    channel.writeAndFlush(request);
+
   }
 
   public void await(Context context) throws InterruptedException, ExecutionException {
