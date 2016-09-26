@@ -104,7 +104,14 @@ public class Client {
     Http2ContentRecorder.getInstance(context).clearTrace(url);
     ChannelManager.getInstance(context).getChannel(url, future -> {
       Channel channel = future.get();
-      sendHttp1Request(channel, url, context);
+      HandshakeManager.getInstance(context).waitHandshake(channel, f -> {
+        if (f.isSuccess()) {
+          sendHttp1Request(channel, url, context);
+        } else {
+          logger.warn("handshake failed for channel: " + channel + ", with url: " + url);
+          Http1ContentRecorder.getInstance(context).clearTrace(url);
+        }
+      });
     });
   }
 
@@ -113,7 +120,6 @@ public class Client {
     FullHttpRequest request = RequestUtil.generateHttp2Request(url);
     Http2ContentRecorder.getInstance(context).logVisitUrl(channel, url, RequestUtil.getStreamId(request));
     channel.writeAndFlush(request);
-
   }
 
   public void await(Context context) throws InterruptedException, ExecutionException {
