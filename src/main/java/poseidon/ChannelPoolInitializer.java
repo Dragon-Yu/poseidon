@@ -42,6 +42,7 @@ public class ChannelPoolInitializer extends AbstractChannelPoolHandler {
 
   @Override
   public void channelCreated(Channel ch) throws Exception {
+    logger.debug("initiate channel: " + ch.id());
     ChannelPipeline pipeline = ch.pipeline();
     // measure the tcp traffic
     pipeline.addLast(TcpTrafficRecorder.getInstance(context).getChannelTrafficShapingHandler(ch));
