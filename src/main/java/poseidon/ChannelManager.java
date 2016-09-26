@@ -1,17 +1,20 @@
 package poseidon;
 
+import com.google.common.util.concurrent.SettableFuture;
 import io.netty.channel.Channel;
 import io.netty.channel.pool.ChannelPool;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.internal.ConcurrentSet;
+import io.netty.util.internal.chmv8.ConcurrentHashMapV8;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.SimpleUrl;
 
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -29,6 +32,7 @@ public class ChannelManager {
   private static ChannelManager ourInstance;
   Set<SimpleUrl> blockedHost = new ConcurrentSet<>();
   private Context context = null;
+  private Map<SimpleUrl, SettableFuture<Channel>> getAndReleaseFutureMap = new ConcurrentHashMapV8<>();
 
   private ChannelManager(Context context) {
     this.context = context;
@@ -84,17 +88,34 @@ public class ChannelManager {
     }
   }
 
+  /**
+   * get channel and release as an atomic operation, this func ensures that there is always only one connection
+   * created no matter the size of the channel pool.
+   */
   public void getChannelAndRelease(URL url, GenericFutureListener<Future<Channel>> listener) {
+    SimpleUrl simpleUrl = new SimpleUrl(url);
     try {
-      ChannelPool channelPool = ChannelPoolManager.getInstance(context).getChannelPool(url);
-      channelPool.acquire().addListeners(future -> {
-        if (future.isSuccess()) {
-          Channel channel = (Channel) future.get();
-          initChannelContext(channel, channelPool, context, url);
-          channelPool.release(channel);
-        }
-      }, listener);
-    } catch (ExecutionException e) {
+      SettableFuture<Channel> newFuture = SettableFuture.create();
+      getAndReleaseFutureMap.putIfAbsent(simpleUrl, newFuture);
+      if (getAndReleaseFutureMap.get(simpleUrl) != newFuture) {
+        // the future already exists
+        SettableFuture<Channel> future = getAndReleaseFutureMap.get(simpleUrl);
+        Channel channel = future.get();
+        listener.operationComplete(ThreadManager.getInstance(context).getEventExecutor().newSucceededFuture(channel));
+      } else {
+        // it's the first time to get the channel
+        getAndReleaseFutureMap.put(simpleUrl, SettableFuture.create());
+        ChannelPool channelPool = ChannelPoolManager.getInstance(context).getChannelPool(simpleUrl);
+        channelPool.acquire().addListeners(future -> {
+          if (future.isSuccess()) {
+            Channel channel = (Channel) future.get();
+            initChannelContext(channel, channelPool, context, url);
+            channelPool.release(channel);
+            getAndReleaseFutureMap.get(simpleUrl).set(channel);
+          }
+        }, listener);
+      }
+    } catch (Exception e) {
       logger.error(e.getMessage(), e);
     }
   }
@@ -116,6 +137,7 @@ public class ChannelManager {
   }
 
   public void release(Channel channel) {
+    logger.debug("release channel: " + channel);
     ChannelPool channelPool = channel.attr(CHANNEL_POOL_ATTRIBUTE_KEY).get();
     channelPool.release(channel);
   }

@@ -43,8 +43,9 @@ public class ChannelPoolManager {
         bootstrap.group(ThreadManager.getInstance(context).getWorkingGroup())
           .channel(NioSocketChannel.class)
           .remoteAddress(key.getAddr(), key.getPort());
-        int channelPoolSize =
-          context.httpsOnly ? BaseTestConfig.CHANNEL_POOL_SIZE : BaseTestConfig.HTTP2_CHANNEL_POOL_SIZE;
+//        int channelPoolSize =
+//          context.httpsOnly ? BaseTestConfig.CHANNEL_POOL_SIZE : BaseTestConfig.HTTP2_CHANNEL_POOL_SIZE;
+        int channelPoolSize = BaseTestConfig.CHANNEL_POOL_SIZE;
         return new FixedChannelPool(bootstrap, channelPoolHandler, channelPoolSize);
       }
     });
@@ -63,8 +64,12 @@ public class ChannelPoolManager {
     return targetSet;
   }
 
+  public ChannelPool getChannelPool(SimpleUrl simpleUrl) throws ExecutionException {
+    return channelPoolCache.get(simpleUrl);
+  }
+
   public ChannelPool getChannelPool(URL url) throws ExecutionException {
-    return channelPoolCache.get(new SimpleUrl(url));
+    return getChannelPool(new SimpleUrl(url));
   }
 
   public void closeAll() {
