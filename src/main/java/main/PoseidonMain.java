@@ -27,6 +27,7 @@ public class PoseidonMain {
     logger.info("uri redirected to: " + uri);
 
     //warm up
+    http1(uri.toURL());
     http2(uri.toURL());
 
     ExperimentData http1ExperimentData = http1(uri.toURL());
