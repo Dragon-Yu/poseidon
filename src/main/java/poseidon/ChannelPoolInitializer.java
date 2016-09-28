@@ -74,7 +74,7 @@ public class ChannelPoolInitializer extends AbstractChannelPoolHandler {
             context.setHttp2Unsupported(true);
             //move record from http/2 to http/1.x
             Http2ContentRecorder.getInstance(context)
-              .clearTrace(ctx.channel().attr(ChannelManager.TARGET_URL_KEY).get());
+              .clearTraceThenUpdateStatus(ctx.channel().attr(ChannelManager.TARGET_URL_KEY).get());
             Http1ContentRecorder.getInstance(context)
               .logVisitUrl(ctx.channel().attr(ChannelManager.TARGET_URL_KEY).get());
           }

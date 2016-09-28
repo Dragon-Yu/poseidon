@@ -48,12 +48,12 @@ public class Client {
               sendHttp1Request(channel, url, context);
             } else {
               logger.warn("handshake failed for channel: " + channel + ", url: " + url);
-              Http1ContentRecorder.getInstance(context).clearTrace(url);
+              Http1ContentRecorder.getInstance(context).clearTraceThenUpdateStatus(url);
             }
           });
         } else {
           logger.error("get channel failed for url: " + url);
-          Http1ContentRecorder.getInstance(context).clearTrace(url);
+          Http1ContentRecorder.getInstance(context).clearTraceThenUpdateStatus(url);
         }
       });
     } else {
@@ -66,12 +66,12 @@ public class Client {
               sendRequest(url, channel, context);
             } else {
               logger.warn("handshake failed for channel: " + channel + ", url: " + url);
-              Http2ContentRecorder.getInstance(context).clearTrace(url);
+              Http2ContentRecorder.getInstance(context).clearTraceThenUpdateStatus(url);
             }
           });
         } else {
           logger.error("get channel failed for url: " + url);
-          Http2ContentRecorder.getInstance(context).clearTrace(url);
+          Http2ContentRecorder.getInstance(context).clearTraceThenUpdateStatus(url);
         }
       });
     }
@@ -92,6 +92,7 @@ public class Client {
 
   private void sendHttp1Request(Channel channel, URL url, Context context) {
     logger.debug("send http1 request to channel: " + channel + ", url: " + url);
+    Http2ContentRecorder.getInstance(context).clearTraceThenUpdateStatus(url);
     Http1ContentRecorder.getInstance(context).logVisitUrl(url);
     HttpRequest request = RequestUtil.generateHttpsRequest(url);
     channel.writeAndFlush(request);
@@ -101,7 +102,6 @@ public class Client {
    * send http/1.x request when the server do not supports http/2
    */
   private void sendHttp1Request(URL url, Context context) {
-    Http2ContentRecorder.getInstance(context).clearTrace(url);
     ChannelManager.getInstance(context).getChannel(url, future -> {
       Channel channel = future.get();
       HandshakeManager.getInstance(context).waitHandshake(channel, f -> {
@@ -109,7 +109,7 @@ public class Client {
           sendHttp1Request(channel, url, context);
         } else {
           logger.warn("handshake failed for channel: " + channel + ", with url: " + url);
-          Http1ContentRecorder.getInstance(context).clearTrace(url);
+          Http1ContentRecorder.getInstance(context).clearTraceThenUpdateStatus(url);
         }
       });
     });

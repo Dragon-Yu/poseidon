@@ -88,6 +88,10 @@ public class Http1ContentRecorder {
   public void clearTrace(URL url) {
     urlOnTheAir.remove(url);
     traceInfoMap.remove(url);
+  }
+
+  public void clearTraceThenUpdateStatus(URL url) {
+    clearTrace(url);
     updateCompleteStatus();
   }
 
