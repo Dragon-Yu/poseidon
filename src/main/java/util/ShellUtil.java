@@ -18,8 +18,8 @@ import java.util.regex.Pattern;
  */
 public class ShellUtil {
   private static Logger logger = LoggerFactory.getLogger(ShellUtil.class);
-  Pattern pattern = Pattern.compile(".*(\\d+) packets dropped by kernel");
   private static Map<Process, Integer> tcpdumpPacketDropInfo = new ConcurrentHashMap<>();
+  Pattern pattern = Pattern.compile(".*(\\d+) packets dropped by kernel");
   private Thread processReadingThread;
   private Thread processWarningLoggingThread;
   private StringBuilder processOutput;
@@ -92,7 +92,7 @@ public class ShellUtil {
     try {
       Thread.sleep(wait);
       Runtime.getRuntime().exec(String.format("sudo pkill -SIGINT %s", processName));
-      Thread.sleep(3000);
+      Thread.sleep(1000);
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
     }

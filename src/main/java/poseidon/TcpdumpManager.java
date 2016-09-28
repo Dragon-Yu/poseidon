@@ -17,7 +17,7 @@ import java.util.Set;
  */
 public class TcpdumpManager {
 
-  private static final int PROCESS_WAITING_TIME = 5000;
+  private static final int PROCESS_WAITING_TIME = 1000;
   private static final Logger logger = LoggerFactory.getLogger(TcpdumpManager.class);
   private static TcpdumpManager ourInstance;
   Process process = createTcpdumpProcess();
