@@ -28,7 +28,7 @@ public class ChannelPoolInitializer extends AbstractChannelPoolHandler {
   private static final String PROTOCOL_ATTR = "protocol";
   public static final AttributeKey<String> PROTOCOL_ATTRIBUTE_KEY = AttributeKey.newInstance(PROTOCOL_ATTR);
   final Context context;
-  ChannelPool channelPool;
+  private ChannelPool channelPool;
 
   public ChannelPoolInitializer(Context context) {
     this.context = context;
@@ -77,14 +77,6 @@ public class ChannelPoolInitializer extends AbstractChannelPoolHandler {
           pipeline.addLast(new Http2SettingsHandler());
           pipeline.addLast(new Http2InboundHandler());
         } else if (ApplicationProtocolNames.HTTP_1_1.equals(protocol)) {
-          if (!context.httpsOnly) {
-            context.setHttp2Unsupported(true);
-            //move record from http/2 to http/1.x
-            Http2ContentRecorder.getInstance(context)
-              .clearTraceThenUpdateStatus(ctx.channel().attr(ChannelManager.TARGET_URL_KEY).get());
-            Http1ContentRecorder.getInstance(context)
-              .logVisitUrl(ctx.channel().attr(ChannelManager.TARGET_URL_KEY).get());
-          }
           pipeline.addLast(new HttpClientCodec());
           pipeline.addLast(new HttpContentDecompressor());
           pipeline.addLast(new Http1InboundHandler());
