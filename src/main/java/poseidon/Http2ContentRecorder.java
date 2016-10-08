@@ -77,7 +77,7 @@ public class Http2ContentRecorder {
   }
 
   public boolean visited(URL url) {
-    return traceInfoMap.containsKey(url);
+    return traceInfoMap.containsKey(url) || urlOnTheAirSet.contains(url);
   }
 
   public void updateCompleteStatus() {

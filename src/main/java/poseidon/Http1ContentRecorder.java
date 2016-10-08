@@ -103,7 +103,7 @@ public class Http1ContentRecorder {
   }
 
   public boolean visited(URL url) {
-    return traceInfoMap.containsKey(url);
+    return traceInfoMap.containsKey(url) || urlOnTheAir.contains(url);
   }
 
   public void updateCompleteStatus() {

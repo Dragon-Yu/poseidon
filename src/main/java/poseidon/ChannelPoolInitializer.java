@@ -5,6 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.pool.AbstractChannelPoolHandler;
+import io.netty.channel.pool.ChannelPool;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpContentDecompressor;
@@ -27,9 +28,14 @@ public class ChannelPoolInitializer extends AbstractChannelPoolHandler {
   private static final String PROTOCOL_ATTR = "protocol";
   public static final AttributeKey<String> PROTOCOL_ATTRIBUTE_KEY = AttributeKey.newInstance(PROTOCOL_ATTR);
   final Context context;
+  ChannelPool channelPool;
 
   public ChannelPoolInitializer(Context context) {
     this.context = context;
+  }
+
+  public void setChannelPool(ChannelPool channelPool) {
+    this.channelPool = channelPool;
   }
 
   private HttpToHttp2ConnectionHandler createHttpToHttp2ConnectionHandler() {
@@ -43,6 +49,7 @@ public class ChannelPoolInitializer extends AbstractChannelPoolHandler {
   @Override
   public void channelCreated(Channel ch) throws Exception {
     logger.debug("initiate channel: " + ch.id());
+    ch.attr(ChannelManager.CHANNEL_POOL_ATTRIBUTE_KEY).set(channelPool);
     ChannelPipeline pipeline = ch.pipeline();
     // measure the tcp traffic
     pipeline.addLast(TcpTrafficRecorder.getInstance(context).getChannelTrafficShapingHandler(ch));

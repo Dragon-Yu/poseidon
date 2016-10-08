@@ -7,7 +7,6 @@ import config.BaseTestConfig;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.pool.ChannelPool;
-import io.netty.channel.pool.ChannelPoolHandler;
 import io.netty.channel.pool.FixedChannelPool;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.internal.ConcurrentSet;
@@ -26,13 +25,11 @@ public class ChannelPoolManager {
   private static final Logger logger = LoggerFactory.getLogger(ChannelPoolManager.class);
   private static ChannelPoolManager ourInstance;
   private LoadingCache<SimpleUrl, ChannelPool> channelPoolCache;
-  private ChannelPoolHandler channelPoolHandler;
   private Set<SimpleUrl> targetSet = new ConcurrentSet<>();
   private Context context;
 
   private ChannelPoolManager(Context context) {
     this.context = context;
-    channelPoolHandler = new ChannelPoolInitializer(context);
     channelPoolCache = CacheBuilder.newBuilder().build(new CacheLoader<SimpleUrl, ChannelPool>() {
       @Override
       public ChannelPool load(SimpleUrl key) throws Exception {
@@ -46,7 +43,10 @@ public class ChannelPoolManager {
 //        int channelPoolSize =
 //          context.httpsOnly ? BaseTestConfig.CHANNEL_POOL_SIZE : BaseTestConfig.HTTP2_CHANNEL_POOL_SIZE;
         int channelPoolSize = BaseTestConfig.CHANNEL_POOL_SIZE;
-        return new FixedChannelPool(bootstrap, channelPoolHandler, channelPoolSize);
+        ChannelPoolInitializer channelPoolHandler = new ChannelPoolInitializer(context);
+        ChannelPool channelPool = new FixedChannelPool(bootstrap, channelPoolHandler, channelPoolSize);
+        channelPoolHandler.setChannelPool(channelPool);
+        return channelPool;
       }
     });
   }
