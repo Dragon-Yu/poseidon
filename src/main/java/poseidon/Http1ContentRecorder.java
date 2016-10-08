@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by Johnson on 16/9/10.
@@ -27,12 +29,13 @@ public class Http1ContentRecorder {
   private static final Logger logger = LoggerFactory.getLogger(Http1ContentRecorder.class);
   private static final ByteToMessageDecoder.Cumulator cumulator = ByteToMessageDecoder.MERGE_CUMULATOR;
   private static Http1ContentRecorder ourInstance;
-  private final SettableFuture<Void> completionFuture = SettableFuture.create();
+  private SettableFuture<Void> completionFuture = SettableFuture.create();
   private Context context = null;
   private Map<Channel, HttpMessage> httpMessageMap = new ConcurrentHashMapV8<>();
   private Map<Channel, ByteBuf> contentMap = new ConcurrentHashMapV8<>();
   private Set<URL> urlOnTheAir = new ConcurrentSet<>();
   private Map<URL, TraceInfo> traceInfoMap = new ConcurrentHashMapV8<>();
+  private Lock completionFutureLock = new ReentrantLock();
 
   private Http1ContentRecorder(Context context) {
     this.context = context;
@@ -83,6 +86,11 @@ public class Http1ContentRecorder {
     logger.debug("visit url: " + url);
     urlOnTheAir.add(url);
     traceInfoMap.put(url, new TraceInfo(url, ApplicationProtocolNames.HTTP_1_1));
+    completionFutureLock.lock();
+    if (completionFuture.isDone()) {
+      completionFuture = SettableFuture.create();
+    }
+    completionFutureLock.unlock();
   }
 
   public void clearTrace(URL url) {
@@ -110,7 +118,9 @@ public class Http1ContentRecorder {
 //    logger.info("update complete status");
     logger.debug(urlOnTheAir.toString());
     if (urlOnTheAir.isEmpty()) {
+      completionFutureLock.lock();
       completionFuture.set(null);
+      completionFutureLock.unlock();
     }
   }
 

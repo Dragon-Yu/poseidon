@@ -92,8 +92,8 @@ public class Client {
 
   private void sendHttp1Request(Channel channel, URL url, Context context) {
     logger.debug("send http1 request to channel: " + channel + ", url: " + url);
-    Http2ContentRecorder.getInstance(context).clearTraceThenUpdateStatus(url);
     Http1ContentRecorder.getInstance(context).logVisitUrl(url);
+    Http2ContentRecorder.getInstance(context).clearTraceThenUpdateStatus(url);
     HttpRequest request = RequestUtil.generateHttpsRequest(url);
     channel.writeAndFlush(request);
   }
@@ -126,6 +126,7 @@ public class Client {
     HandshakeManager.getInstance(context).waitHandshake();
     Http2ContentRecorder.getInstance(context).waitCompletion();
     Http1ContentRecorder.getInstance(context).waitCompletion();
+    Http2ContentRecorder.getInstance(context).waitCompletion();
     ChannelManager.getInstance(context).closeAll();
     ThreadManager.getInstance(context).getWorkingGroup().shutdownGracefully();
   }

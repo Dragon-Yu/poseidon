@@ -17,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by Johnson on 16/9/10.
@@ -28,6 +30,7 @@ public class Http2ContentRecorder {
   Set<URL> urlOnTheAirSet = new ConcurrentSet<>();
   Map<Pair<Channel, Integer>, URL> urlOnTheAir = new ConcurrentHashMapV8<>();
   Map<URL, TraceInfo> traceInfoMap = new ConcurrentHashMapV8<>();
+  Lock completeFutureLock = new ReentrantLock();
   private Context context = null;
 
   private Http2ContentRecorder(Context context) {
@@ -44,7 +47,13 @@ public class Http2ContentRecorder {
   }
 
   public void logPreVisitUrl(URL url) {
+    logger.debug("pre visit url: " + url);
     urlOnTheAirSet.add(url);
+    completeFutureLock.lock();
+    if (completeFuture.isDone()) {
+      completeFuture = SettableFuture.create();
+    }
+    completeFutureLock.unlock();
   }
 
   public void logVisitUrl(Channel channel, URL url, int streamId) {
@@ -83,12 +92,17 @@ public class Http2ContentRecorder {
   public void updateCompleteStatus() {
     logger.debug(String.format("%s, %s", urlOnTheAir.values().toString(), urlOnTheAirSet.toString()));
     if (urlOnTheAirSet.isEmpty() && urlOnTheAir.isEmpty()) {
+      completeFutureLock.lock();
       completeFuture.set(null);
+      completeFutureLock.unlock();
     }
   }
 
   public void clearTraceThenUpdateStatus(URL url) {
+    boolean updated = urlOnTheAirSet.contains(url);
     urlOnTheAirSet.remove(url);
-    updateCompleteStatus();
+    if (updated) {
+      updateCompleteStatus();
+    }
   }
 }

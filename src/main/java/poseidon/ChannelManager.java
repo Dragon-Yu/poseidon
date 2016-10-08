@@ -143,6 +143,7 @@ public class ChannelManager {
   }
 
   public void closeAll() {
+    logger.info("close all");
     ChannelPoolManager.getInstance(context).closeAll();
   }
 }
