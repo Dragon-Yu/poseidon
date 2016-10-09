@@ -26,6 +26,10 @@ public class PoseidonMain {
     URI uri = new URI(BaseTestConfig.URI);
     uri = new RedirectionDetector(uri.toURL()).autoRedirect().toURI();
     logger.info("uri redirected to: " + uri);
+    if (!uri.getScheme().equals("https")) {
+      logger.warn("skip non-https uri: " + uri);
+      return;
+    }
 
     //warm up
     http1(uri.toURL());
