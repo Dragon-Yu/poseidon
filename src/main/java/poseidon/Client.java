@@ -123,7 +123,7 @@ public class Client {
   }
 
   public void await(Context context) throws InterruptedException, ExecutionException {
-    HandshakeManager.getInstance(context).waitHandshake();
+//    HandshakeManager.getInstance(context).waitHandshake();
     Http2ContentRecorder.getInstance(context).waitCompletion();
     Http1ContentRecorder.getInstance(context).waitCompletion();
     Http2ContentRecorder.getInstance(context).waitCompletion();
