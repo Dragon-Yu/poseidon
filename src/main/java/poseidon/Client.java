@@ -61,14 +61,19 @@ public class Client {
       ChannelManager.getInstance(context).getChannelAndRelease(url, future -> {
         if (future.isSuccess()) {
           Channel channel = future.get();
-          HandshakeManager.getInstance(context).waitHandshake(channel, future1 -> {
-            if (future1.isSuccess()) {
-              sendRequest(url, channel, context);
-            } else {
-              logger.warn("handshake failed for channel: " + channel + ", url: " + url);
-              Http2ContentRecorder.getInstance(context).clearTraceThenUpdateStatus(url);
-            }
-          });
+          if (channel != null) {
+            HandshakeManager.getInstance(context).waitHandshake(channel, future1 -> {
+              if (future1.isSuccess()) {
+                sendRequest(url, channel, context);
+              } else {
+                logger.warn("handshake failed for channel: " + channel + ", url: " + url);
+                Http2ContentRecorder.getInstance(context).clearTraceThenUpdateStatus(url);
+              }
+            });
+          } else {
+            logger.error("get channel failed for url: " + url);
+            Http2ContentRecorder.getInstance(context).clearTraceThenUpdateStatus(url);
+          }
         } else {
           logger.error("get channel failed for url: " + url);
           Http2ContentRecorder.getInstance(context).clearTraceThenUpdateStatus(url);

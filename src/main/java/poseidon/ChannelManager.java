@@ -112,6 +112,8 @@ public class ChannelManager {
             initChannelContext(channel, channelPool, context, url);
             channelPool.release(channel);
             getAndReleaseFutureMap.get(simpleUrl).set(channel);
+          } else {
+            getAndReleaseFutureMap.get(simpleUrl).set(null);
           }
         }, listener);
       }
