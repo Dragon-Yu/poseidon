@@ -1,5 +1,6 @@
 package main;
 
+import com.google.common.collect.ImmutableMap;
 import config.BaseTestConfig;
 import entity.*;
 import fullweb.TraceInfo;
@@ -75,5 +76,12 @@ public class PoseidonMain {
     ExperimentData experimentData = new ExperimentData(Http1ContentRecorder.getInstance(context).getTraceInfoList(),
       tcpTrafficSize, tcpdumpInfo, t2 - t1);
     return experimentData;
+  }
+
+  private static TcpdumpInfo emptyTcpdumpInfo() {
+    MeasuredTrafficSize measuredTrafficSize =
+      new MeasuredTrafficSize(ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of(), ImmutableMap.of());
+    TcpdumpInfo tcpdumpInfo = new TcpdumpInfo(measuredTrafficSize, -1);
+    return tcpdumpInfo;
   }
 }
