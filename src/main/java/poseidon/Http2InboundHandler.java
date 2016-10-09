@@ -29,7 +29,10 @@ public class Http2InboundHandler extends SimpleChannelInboundHandler<FullHttpRes
     Integer streamId = msg.headers().getInt(HttpConversionUtil.ExtensionHeaderNames.STREAM_ID.text());
     Http2ContentRecorder.getInstance(context).logCompleteUrl(streamId, ctx.channel());
     ByteBuf content = msg.content();
-    ContentType contentType = ContentType.parse(msg.headers().get(HttpHeaderNames.CONTENT_TYPE));
+    ContentType contentType = null;
+    if (msg.headers().contains(HttpHeaderNames.CONTENT_TYPE)) {
+      contentType = ContentType.parse(msg.headers().get(HttpHeaderNames.CONTENT_TYPE));
+    }
     if (content.isReadable()) {
       int contentLength = content.readableBytes();
       byte[] arr = new byte[contentLength];
@@ -37,7 +40,7 @@ public class Http2InboundHandler extends SimpleChannelInboundHandler<FullHttpRes
       logger.debug("content size: " + arr.length + " for stream: " + streamId);
 
       //only parse html content
-      if (contentType.getMimeType().equals(ContentType.TEXT_HTML.getMimeType())) {
+      if (contentType != null && contentType.getMimeType().equals(ContentType.TEXT_HTML.getMimeType())) {
         Charset charset = contentType.getCharset();
         if (charset == null) {
           charset = Charset.defaultCharset();
