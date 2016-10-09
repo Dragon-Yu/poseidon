@@ -24,6 +24,7 @@ public class BaseTestConfig {
   private static final String ATTR_IGNORE_OUTER_LINK = "ignore_outer_link";
   private static final String ATTR_CHANNEL_POOL_SIZE = "channel_pool_size";
   private static final String ATTR_HTTP2_CHANNEL_POOL_SIZE = "http2_channel_pool_size";
+  private static final String ATTR_NOTE = "note";
   public static int REQUEST_TIMES = 20;
   public static int CHANNEL_POOL_SIZE = 20;
   public static int HTTP2_CHANNEL_POOL_SIZE = 1;
@@ -39,6 +40,7 @@ public class BaseTestConfig {
   public static String POSEIDON_LOG_URL = "https://prometheus-1151.appspot.com/log/poseidon";
   public static String HOSTS_TO_CHECK = "[\"https://baidu.com\", \"https://google.com\"]";
   public static String TCPDUMP_CMD = "sudo -S tcpdump -B 10240 -lnnv tcp";
+  public static String NOTE = null;
 
   static {
     for (Field field : BaseTestConfig.class.getDeclaredFields()) {

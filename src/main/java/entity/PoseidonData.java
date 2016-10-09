@@ -1,6 +1,7 @@
 package entity;
 
 import com.google.gson.annotations.SerializedName;
+import config.BaseTestConfig;
 
 /**
  * Created by Johnson on 16/9/13.
@@ -21,5 +22,8 @@ public class PoseidonData {
     this.http2Data = http2Data;
     this.config = config;
     this.http2Unsupported = http2Unsupported;
+    if (BaseTestConfig.NOTE != null) {
+      note = BaseTestConfig.NOTE;
+    }
   }
 }
