@@ -1,12 +1,11 @@
 package network;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.IOException;
-import java.net.HttpURLConnection;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 
@@ -26,10 +25,7 @@ public class RedirectionDetector {
   public static void main(String[] args) throws Exception {
     URL url = new URL("https://jigsaw.w3.org/HTTP/300/302.html");
     RedirectionDetector detector = new RedirectionDetector(url);
-    if (detector.detect()) {
-      logger.info(detector.getRedirectedUrl().toString());
-      logger.info(detector.getRedirectedUrl().toURI().toASCIIString());
-    }
+    logger.info(detector.autoRedirect().toString());
   }
 
   public URL autoRedirect() throws IOException, URISyntaxException {
@@ -41,16 +37,15 @@ public class RedirectionDetector {
   }
 
   public boolean detect() throws IOException, URISyntaxException {
-    HttpsURLConnection.setFollowRedirects(false);
+    HttpsURLConnection.setFollowRedirects(true);
     HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-    HttpURLConnection.setFollowRedirects(false);
-    String urlStr = connection.getHeaderField("Location");
-    if (StringUtils.isEmpty(urlStr)) {
-      return false;
-    } else {
-      redirectedUrl = new URL(urlStr);
+    InputStream is = connection.getInputStream();
+    is.close();
+    if (!url.equals(connection.getURL())) {
+      redirectedUrl = connection.getURL();
       return true;
     }
+    return false;
   }
 
   public URL getRedirectedUrl() {
