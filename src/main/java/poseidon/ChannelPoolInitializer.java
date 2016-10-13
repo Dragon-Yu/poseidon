@@ -43,7 +43,8 @@ public class ChannelPoolInitializer extends AbstractChannelPoolHandler {
     return new HttpToHttp2ConnectionHandlerBuilder()
       .frameListener(new DelegatingDecompressorFrameListener(http2Connection,
         new InboundHttp2ToHttpAdapterBuilder(http2Connection).maxContentLength(Integer.MAX_VALUE)
-          .propagateSettings(true).build())).connection(http2Connection).build();
+          .propagateSettings(true).build())).connection(http2Connection)
+      .encoderEnforceMaxConcurrentStreams(true).build();
   }
 
   @Override
