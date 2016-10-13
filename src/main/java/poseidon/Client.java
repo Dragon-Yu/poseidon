@@ -11,6 +11,7 @@ import util.RequestUtil;
 import javax.net.ssl.SSLException;
 import java.net.URL;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Johnson on 16/9/7.
@@ -128,11 +129,11 @@ public class Client {
   }
 
   public void await(Context context) throws InterruptedException, ExecutionException {
-//    HandshakeManager.getInstance(context).waitHandshake();
     Http2ContentRecorder.getInstance(context).waitCompletion();
     Http1ContentRecorder.getInstance(context).waitCompletion();
     Http2ContentRecorder.getInstance(context).waitCompletion();
     ChannelManager.getInstance(context).closeAll();
+    ThreadManager.getInstance(context).getWorkingGroup().awaitTermination(3, TimeUnit.SECONDS);
     ThreadManager.getInstance(context).getWorkingGroup().shutdownGracefully();
   }
 }
