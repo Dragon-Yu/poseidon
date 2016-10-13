@@ -7,6 +7,7 @@ import io.netty.handler.ssl.ApplicationProtocolNames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.RequestUtil;
+import util.UrlUtil;
 
 import javax.net.ssl.SSLException;
 import java.net.URL;
@@ -25,7 +26,8 @@ public class Client {
     this.https_only = https_only;
   }
 
-  public void visit(URL url, Context context) throws InterruptedException, ExecutionException {
+  public void visit(URL target, Context context) throws InterruptedException, ExecutionException {
+    final URL url = UrlUtil.encodeUrl(target);
     if (Http1ContentRecorder.getInstance(context).visited(url) ||
       Http2ContentRecorder.getInstance(context).visited(url)) {
 //      logger.debug("duplicate url visitation: " + url);

@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import poseidon.*;
 import util.Uploader;
+import util.UrlUtil;
 
 import java.net.URI;
 import java.net.URL;
@@ -23,7 +24,7 @@ public class PoseidonMain {
   private static Logger logger = LoggerFactory.getLogger(MultiConnMain.class);
 
   public static void main(String[] args) throws Exception {
-    URI uri = new URI(BaseTestConfig.URI);
+    URI uri = UrlUtil.getUri(BaseTestConfig.URI);
     uri = new RedirectionDetector(uri.toURL()).autoRedirect().toURI();
     logger.info("uri redirected to: " + uri);
     if (!uri.getScheme().equals("https")) {
