@@ -133,7 +133,18 @@ public class Client {
     Http1ContentRecorder.getInstance(context).waitCompletion();
     Http2ContentRecorder.getInstance(context).waitCompletion();
     ChannelManager.getInstance(context).closeAll();
-    ThreadManager.getInstance(context).getWorkingGroup().awaitTermination(3, TimeUnit.SECONDS);
-    ThreadManager.getInstance(context).getWorkingGroup().shutdownGracefully();
+  }
+
+  public void shutdownGracefullyAsync(Context context) {
+    new Thread(() -> shutdownGracefully(context)).start();
+  }
+
+  private void shutdownGracefully(Context context) {
+    try {
+      ThreadManager.getInstance(context).getWorkingGroup().awaitTermination(1, TimeUnit.SECONDS);
+      ThreadManager.getInstance(context).getWorkingGroup().shutdownGracefully();
+    } catch (InterruptedException e) {
+      logger.error(e.getMessage(), e);
+    }
   }
 }
