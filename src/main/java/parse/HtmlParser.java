@@ -47,7 +47,10 @@ public class HtmlParser {
           outerLinks.add(getLinkFromElement(element, "src"));
           break;
         case "link":
-          outerLinks.add(getLinkFromElement(element, "href"));
+          String rel = element.attr("rel");
+          if (!rel.equals("next") && !rel.equals("pre")) {
+            outerLinks.add(getLinkFromElement(element, "href"));
+          }
           break;
         case "img":
           outerLinks.add(getLinkFromElement(element, "src"));
