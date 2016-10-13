@@ -54,7 +54,7 @@ public class SimpleUrl {
     if (!(o instanceof SimpleUrl)) return false;
     SimpleUrl simpleUrl = (SimpleUrl) o;
     return port == simpleUrl.port &&
-      Objects.equal(addr, simpleUrl.addr);
+      Objects.equal(host, simpleUrl.host);
   }
 
   @Override
